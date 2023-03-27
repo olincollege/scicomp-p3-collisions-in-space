@@ -1,0 +1,25 @@
+{
+  "name": "scicomp-p3-collisions-in-space",
+  "version": "1.0.0",
+  "description": "",
+  "main": "simulation/sim.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/olincollege/scicomp-p3-collisions-in-space.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/olincollege/scicomp-p3-collisions-in-space/issues"
+  },
+  "homepage": "https://github.com/olincollege/scicomp-p3-collisions-in-space#readme",
+  "dependencies": {
+    "canvas-sketch": "^0.7.7",
+    "canvas-sketch-util": "^1.10.0",
+    "three": "^0.150.1"
+  }
+}
