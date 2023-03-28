@@ -1,0 +1,1 @@
+// contains logic to go through scene objects and update their vertices 
