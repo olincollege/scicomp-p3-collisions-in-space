@@ -1,7 +1,5 @@
 import canvasSketch from 'canvas-sketch';
-import random from 'canvas-sketch-util/random';
-import color from 'canvas-sketch-util/color';
-import { mapRange, clamp } from 'canvas-sketch-util/math';
+import updateMeshes from './simulation'
 
 import * as THREE from 'three';
 global.THREE = THREE;
@@ -54,15 +52,22 @@ const sketch = ({ context, fps }) => {
   // Define all meshes
   const initializeMeshes = () => {
     const mesh = new THREE.Mesh(
-      new THREE.BoxGeometry(1, 1, 1),
+      new THREE.SphereGeometry(1, 12, 12),
       new THREE.MeshPhysicalMaterial({
         color: 'white',
         roughness: 0.75,
-        flatShading: true
+        flatShading: false
       })
     );
+    const meshes = [mesh]
 
-    return mesh
+    return meshes
+  }
+
+  const addMeshes = (scene, meshes) => {
+    meshes.forEach((mesh) => {
+      scene.add(mesh)
+    })
   }
 
   const renderer = initializeRenderer()
@@ -74,9 +79,9 @@ const sketch = ({ context, fps }) => {
   // Load scene
   const scene = new THREE.Scene();
 
-  // Load meshes and add to scene
+  // Load meshes and add them to scene
   const meshes = initializeMeshes()
-  scene.add(meshes);
+  addMeshes(scene, meshes)
 
   // Add some light
   scene.add(new THREE.AmbientLight('#59314f'));
@@ -95,9 +100,13 @@ const sketch = ({ context, fps }) => {
     // And render events here
     render({ time, deltaTime }) {
       // const state = [getGuiParams(), getCurrentTime()] // maybe there's a separate gui file...
+      const state = {
+        time: time,
+        visibleGroups: ["group1"]
+      }
 
-      // updateObjects(meshes, state) // meshes would get passed into this
-      meshes.rotation.y = time * (10 * Math.PI / 180); // above rep.aces this
+      updateMeshes(meshes, state)
+      // updateMeshes(meshes, state) // meshes would get passed into this
 
       controls.update();
       renderer.render(scene, camera);
