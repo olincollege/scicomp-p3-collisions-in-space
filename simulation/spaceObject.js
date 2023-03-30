@@ -49,4 +49,9 @@ export default class SpaceObject {
         this.currentPosition = newPosition
         this.updateMeshPosition(newPosition)
     }
+
+    setVisibility = (isVisible) => {
+        this.objectMesh.visible = isVisible
+        this.orbitMesh.visible = isVisible
+    }
 }

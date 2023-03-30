@@ -98,7 +98,7 @@ const sketch = ({ context, fps }) => {
       // const state = [getGuiParams(), getCurrentTime()] // maybe there's a separate gui file...
       const state = {
         time: time % 1.5,
-        visibleGroups: ["group1"]
+        visibleGroups: ["planets", "asteroids"]
       }
 
       updateSpaceObjects(spaceObjects, state)

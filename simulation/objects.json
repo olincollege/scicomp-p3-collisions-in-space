@@ -1,7 +1,7 @@
 [
     {
         "name": "name 1",
-        "group": "groupname 1",
+        "group": "asteroids",
         "size": 2,
         "positions": [
             {
@@ -18,7 +18,7 @@
     },
     {
         "name": "name 2",
-        "group": "groupname 1",
+        "group": "planets",
         "size": 1,
         "positions": [
             {
