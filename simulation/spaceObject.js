@@ -30,9 +30,12 @@ export default class SpaceObject {
     }
 
     createOrbitMesh = () => {
-        const points = this.positions.map((position) => {
+        let points = this.positions.map((position) => {
             return new THREE.Vector3(position.x, position.y, position.z)
         })
+        // add first position at end to close the loop
+        points.push(new THREE.Vector3(this.positions[0].x, this.positions[0].y, this.positions[0].z))
+
         const material = new THREE.LineBasicMaterial({ color: 0x0000ff });
         const geometry = new THREE.BufferGeometry().setFromPoints(points);
         return new THREE.Line(geometry, material);
