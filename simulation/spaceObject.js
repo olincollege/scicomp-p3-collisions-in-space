@@ -30,8 +30,9 @@ export default class SpaceObject {
             new THREE.SphereGeometry(this.size, 12, 12),
             new THREE.MeshPhysicalMaterial({
                 color: this.objectColor,
-                roughness: 0.75,
-                flatShading: false
+                roughness: 1,
+                flatShading: false,
+                emissive: (this.type == 'star') ? 'yellow' : 'black',
             })
         )
         mesh.position.x = this.currentPosition.x
