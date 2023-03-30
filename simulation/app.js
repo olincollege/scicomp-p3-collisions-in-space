@@ -8,7 +8,7 @@ require("three/examples/js/controls/OrbitControls");
 
 import data from './objects.json'
 
-const TIME_STEP_INTERVAL = 1.5
+const TIME_STEP_INTERVAL = .1
 const DEFAULT_START_DATE = 0
 
 // specific to canvas, not our own params
@@ -132,7 +132,7 @@ const sketch = ({ context, fps }) => {
 
       // const state = [getGuiParams(), getCurrentTime()] // maybe there's a separate gui file...
       const state = {
-        time: time % 1.5,
+        time: time % .7,
         visibleGroups: ["planets", "asteroids"]
       }
 
