@@ -2,9 +2,18 @@ import canvasSketch from 'canvas-sketch';
 import updateSpaceObjects from './simulation'
 import SpaceObject from './spaceObject';
 
+
 import * as THREE from 'three';
 global.THREE = THREE;
 require("three/examples/js/controls/OrbitControls");
+require("three/examples/js/shaders/ConvolutionShader");
+require("three/examples/js/shaders/CopyShader");
+require("three/examples/js/shaders/LuminosityHighPassShader");
+require("three/examples/js/postprocessing/EffectComposer");
+require("three/examples/js/postprocessing/RenderPass");
+require("three/examples/js/postprocessing/ShaderPass");
+require("three/examples/js/postprocessing/BloomPass");
+require("three/examples/js/postprocessing/UnrealBloomPass");
 
 import data from './objects.json'
 
@@ -29,7 +38,7 @@ const sketch = ({ context, fps }) => {
   // Setup renderer
   const initializeRenderer = () => {
     const renderer = new THREE.WebGLRenderer({
-      context
+      context: context,
     });
     // WebGL background color
     renderer.setClearColor('#000', 1);
@@ -40,7 +49,7 @@ const sketch = ({ context, fps }) => {
   // Setup a camera
   const initializeCamera = () => {
     const camera = new THREE.PerspectiveCamera(45, 1, 0.01, 1000);
-    camera.position.set(2, 2, -4);
+    camera.position.set(0, 100, -40);
     camera.lookAt(new THREE.Vector3())
 
     return camera
@@ -68,7 +77,7 @@ const sketch = ({ context, fps }) => {
     })
   }
 
-  const renderer = initializeRenderer()
+
   const camera = initializeCamera()
 
   // Setup camera controller
@@ -86,10 +95,25 @@ const sketch = ({ context, fps }) => {
   addMeshes(scene, spaceObjects)
 
   // Add some light
-  scene.add(new THREE.AmbientLight('#59314f'));
-  const light = new THREE.PointLight('#45caf7', 1, 15.5);
-  light.position.set(2, 2, -4).multiplyScalar(1.5);
-  scene.add(light);
+  scene.add(new THREE.AmbientLight('white', .4));
+  const sun = new THREE.PointLight('white', .8);
+  scene.add(sun);
+
+  // Set up renderer and render pass
+  const renderer = initializeRenderer()
+  const renderScene = new THREE.RenderPass(scene, camera);
+
+  // Set up bloom effect pass
+  const bloomPass = new THREE.UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight));
+  bloomPass.strength = 3;
+  bloomPass.threshold = .01;
+  bloomPass.radius = 1;
+
+  // Combine everything with an effect composer
+  const composer = new THREE.EffectComposer(renderer);
+  composer.setSize(window.innerWidth, window.innerHeight);
+  composer.addPass(renderScene);
+  composer.addPass(bloomPass);
 
   // Callback for mouse movement
   const onMouseMove = (event) => {
@@ -142,7 +166,7 @@ const sketch = ({ context, fps }) => {
       updateSpaceObjects(spaceObjects, state)
 
       controls.update();
-      renderer.render(scene, camera);
+      composer.render();
     },
     // Dispose of WebGL context (optional)
     unload() {
