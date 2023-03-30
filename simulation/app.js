@@ -61,7 +61,8 @@ const sketch = ({ context, fps }) => {
 
   const addMeshes = (scene, spaceObjects) => {
     spaceObjects.forEach((spaceObject) => {
-      scene.add(spaceObject.mesh)
+      scene.add(spaceObject.objectMesh)
+      scene.add(spaceObject.orbitMesh)
     })
   }
 

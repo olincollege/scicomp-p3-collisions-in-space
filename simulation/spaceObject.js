@@ -7,10 +7,11 @@ export default class SpaceObject {
         this.size = size
         this.group = group
         this.startDate = startDate
-        this.mesh = this.initializeMesh()
+        this.objectMesh = this.createObjectMesh()
+        this.orbitMesh = this.createOrbitMesh()
     }
 
-    initializeMesh = () => {
+    createObjectMesh = () => {
         const mesh = new THREE.Mesh(
             new THREE.SphereGeometry(this.size, 12, 12),
             new THREE.MeshPhysicalMaterial({
@@ -25,10 +26,19 @@ export default class SpaceObject {
         return mesh
     }
 
+    createOrbitMesh = () => {
+        const points = this.positions.map((position) => {
+            return new THREE.Vector3(position.x, position.y, position.z)
+        })
+        const material = new THREE.LineBasicMaterial({ color: 0x0000ff });
+        const geometry = new THREE.BufferGeometry().setFromPoints(points);
+        return new THREE.Line(geometry, material);
+    }
+
     updateMeshPosition = (position) => {
-        this.mesh.position.x = position.x
-        this.mesh.position.y = position.y
-        this.mesh.position.z = position.z
+        this.objectMesh.position.x = position.x
+        this.objectMesh.position.y = position.y
+        this.objectMesh.position.z = position.z
     }
 
     updatePositionAtTime = (time) => {
