@@ -16,7 +16,6 @@ const settings = {
   animate: true,
   attributes: { antialias: true },
   context: 'webgl',
-  dimensions: [2048, 2048],
 };
 
 const Visualizer = {
