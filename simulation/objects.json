@@ -1,7 +1,22 @@
 [
     {
-        "name": "name 1",
-        "group": "asteroids",
+        "name": "Sun",
+        "type": "star",
+        "group": "solar system",
+        "size": 2,
+        "positions": [
+            {
+                "x": 0,
+                "y": 0,
+                "z": 0
+            }
+        ]
+    },
+    {
+        "name": "Earth",
+        "type": "planet",
+        "group": "solar system",
+        "color": "blue",
         "size": 0.5,
         "positions": [
             {
@@ -47,13 +62,15 @@
         ]
     },
     {
-        "name": "name 2",
-        "group": "planets",
-        "size": 2,
+        "name": "433 Eros",
+        "type": "asteroid",
+        "group": "amor",
+        "size": 0.2,
+        "color": "grey",
         "positions": [
             {
-                "x": 0,
-                "y": 0,
+                "x": 6,
+                "y": 6,
                 "z": 0
             }
         ]
