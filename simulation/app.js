@@ -1,9 +1,15 @@
 import canvasSketch from 'canvas-sketch';
-import updateMeshes from './simulation'
+import updateSpaceObjects from './simulation'
+import SpaceObject from './spaceObject';
 
 import * as THREE from 'three';
 global.THREE = THREE;
 require("three/examples/js/controls/OrbitControls");
+
+import data from './objects.json'
+
+const TIME_STEP_INTERVAL = 1.5
+const DEFAULT_START_DATE = 0
 
 // specific to canvas, not our own params
 const settings = {
@@ -13,19 +19,11 @@ const settings = {
   dimensions: [2048, 2048],
 };
 
-
-const initialize = () => {
-  data = initializeData()
-}
-
-
 const Visualizer = {
   currentTime: 1,
   currentView: "view",
   currentSpaceObjects: ["spaceObject"]
 }
-
-
 
 const sketch = ({ context, fps }) => {
 
@@ -49,24 +47,22 @@ const sketch = ({ context, fps }) => {
     return camera
   }
 
-  // Define all meshes
-  const initializeMeshes = () => {
-    const mesh = new THREE.Mesh(
-      new THREE.SphereGeometry(1, 12, 12),
-      new THREE.MeshPhysicalMaterial({
-        color: 'white',
-        roughness: 0.75,
-        flatShading: false
-      })
-    );
-    const meshes = [mesh]
-
-    return meshes
+  const initializeSpaceObjects = () => {
+    return data.map(object => {
+      return new SpaceObject(
+        object.name,
+        object.positions,
+        TIME_STEP_INTERVAL,
+        object.size,
+        object.group,
+        DEFAULT_START_DATE
+      )
+    })
   }
 
-  const addMeshes = (scene, meshes) => {
-    meshes.forEach((mesh) => {
-      scene.add(mesh)
+  const addMeshes = (scene, spaceObjects) => {
+    spaceObjects.forEach((spaceObject) => {
+      scene.add(spaceObject.mesh)
     })
   }
 
@@ -80,8 +76,8 @@ const sketch = ({ context, fps }) => {
   const scene = new THREE.Scene();
 
   // Load meshes and add them to scene
-  const meshes = initializeMeshes()
-  addMeshes(scene, meshes)
+  const spaceObjects = initializeSpaceObjects()
+  addMeshes(scene, spaceObjects)
 
   // Add some light
   scene.add(new THREE.AmbientLight('#59314f'));
@@ -101,12 +97,11 @@ const sketch = ({ context, fps }) => {
     render({ time, deltaTime }) {
       // const state = [getGuiParams(), getCurrentTime()] // maybe there's a separate gui file...
       const state = {
-        time: time,
+        time: time % 1.5,
         visibleGroups: ["group1"]
       }
 
-      updateMeshes(meshes, state)
-      // updateMeshes(meshes, state) // meshes would get passed into this
+      updateSpaceObjects(spaceObjects, state)
 
       controls.update();
       renderer.render(scene, camera);
