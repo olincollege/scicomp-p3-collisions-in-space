@@ -50,11 +50,13 @@ const sketch = ({ context, fps }) => {
     return data.map(object => {
       return new SpaceObject(
         object.name,
+        object.type,
+        object.group,
+        object.size,
         object.positions,
         TIME_STEP_INTERVAL,
-        object.size,
-        object.group,
-        DEFAULT_START_DATE
+        DEFAULT_START_DATE,
+        object.color
       )
     })
   }
@@ -133,7 +135,8 @@ const sketch = ({ context, fps }) => {
       // const state = [getGuiParams(), getCurrentTime()] // maybe there's a separate gui file...
       const state = {
         time: time % .7,
-        visibleGroups: ["planets", "asteroids"]
+        visibleTypes: ["star", "planet", "asteroid"],
+        visibleGroups: ["solar system", "amor"]
       }
 
       updateSpaceObjects(spaceObjects, state)

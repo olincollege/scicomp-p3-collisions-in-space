@@ -1,17 +1,28 @@
 const highlightColor = 'red'
+const defaultColorMap = {
+    'star': 'yellow',
+    'planet': 'pink',
+    'asteroid': 'grey'
+}
 
 export default class SpaceObject {
-    constructor(name, positions, stepInterval, size, group, startDate) {
+    constructor(name, type, group, size, positions, stepInterval, startDate, color = '') {
         this.name = name
-        this.positions = positions
-        this.stepInterval = stepInterval
-        this.currentPosition = this.positions[0]
-        this.size = size
+        this.type = type
         this.group = group
+        this.size = size
+        this.positions = positions
+        this.currentPosition = this.positions[0]
+        this.stepInterval = stepInterval
         this.startDate = startDate
         this.objectMesh = this.createObjectMesh()
-        this.objectColor = 'white'
         this.orbitMesh = this.createOrbitMesh()
+
+        if (color == '') {
+            this.objectColor = defaultColorMap[type]
+        } else {
+            this.objectColor = color
+        }
     }
 
     createObjectMesh = () => {

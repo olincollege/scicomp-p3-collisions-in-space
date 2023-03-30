@@ -5,7 +5,7 @@ export default function updateSpaceObjects(spaceObjects, state) {
         spaceObject.updatePositionAtTime(state.time)
 
         // update visibility
-        const isVisible = state.visibleGroups.includes(spaceObject.group)
+        const isVisible = state.visibleGroups.includes(spaceObject.group) && state.visibleTypes.includes(spaceObject.type)
         spaceObject.setVisibility(isVisible)
     })
 }
