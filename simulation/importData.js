@@ -1,5 +1,7 @@
 import getData from './api'
 
+const NORM = 10 ** 6
+
 export default async () => {
   const rawData = await getData()
   const proccessedData = []
@@ -30,13 +32,25 @@ const processData = (rawData) => {
   return spaceObject
 }
 
+const getRadius = (table) => {
+  let radiusMatch = table.match(/Equat\. radius \(1 bar\) += +(?<radius>\d+)/i)
+  if (radiusMatch == null) {
+    radiusMatch = table.match(/Solar radius \(IAU\) += +(?<radius>\d+)/i)
+  }
+  if (radiusMatch == null) {
+    radiusMatch = table.match(/Vol\. Mean Radius \(km\) += +(?<radius>\d+)/i)
+  }
+  return radiusMatch.groups.radius
+}
+
 const parseProperties = (table) => {
+  const radius = getRadius(table)
   let properties = {
     name: "Test",
     type: "planet",
     group: "solar system",
     color: "blue",
-    size: 0.5,
+    size: radius / NORM,
   }
   return properties
 }
@@ -60,7 +74,7 @@ const parseVectorField = (vectorField) => {
       num = parseFloat(num)
       e = parseFloat(e)
       num = num * (10 ** e)
-      return num
+      return num / NORM
     })
     positions.push({
       "x": parsedPositions[0],
