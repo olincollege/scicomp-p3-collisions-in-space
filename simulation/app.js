@@ -1,7 +1,8 @@
 import canvasSketch from 'canvas-sketch';
+
 import updateSpaceObjects from './simulation'
 import SpaceObject from './spaceObject';
-
+import importData from './importData'
 
 import * as THREE from 'three';
 global.THREE = THREE;
@@ -15,9 +16,9 @@ require("three/examples/js/postprocessing/ShaderPass");
 require("three/examples/js/postprocessing/BloomPass");
 require("three/examples/js/postprocessing/UnrealBloomPass");
 
-import data from './objects.json'
+// import data from './objects.json'
 
-const TIME_STEP_INTERVAL = .1
+const TIME_STEP_INTERVAL = .01
 const DEFAULT_START_DATE = 0
 
 // specific to canvas, not our own params
@@ -33,8 +34,7 @@ const Visualizer = {
   currentSpaceObjects: ["spaceObject"]
 }
 
-const sketch = ({ context, fps }) => {
-
+const sketch = async ({ context, fps }) => {
   // Setup renderer
   const initializeRenderer = () => {
     const renderer = new THREE.WebGLRenderer({
@@ -48,14 +48,15 @@ const sketch = ({ context, fps }) => {
 
   // Setup a camera
   const initializeCamera = () => {
-    const camera = new THREE.PerspectiveCamera(45, 1, 0.01, 1000);
+    const camera = new THREE.PerspectiveCamera(45, 1, 0.01, 5000);
     camera.position.set(0, 100, -40);
     camera.lookAt(new THREE.Vector3())
 
     return camera
   }
 
-  const initializeSpaceObjects = () => {
+  const initializeSpaceObjects = async () => {
+    const data = await importData()
     return data.map(object => {
       return new SpaceObject(
         object.name,
@@ -77,7 +78,6 @@ const sketch = ({ context, fps }) => {
     })
   }
 
-
   const camera = initializeCamera()
 
   // Setup camera controller
@@ -91,7 +91,7 @@ const sketch = ({ context, fps }) => {
   const scene = new THREE.Scene();
 
   // Load meshes and add them to scene
-  const spaceObjects = initializeSpaceObjects()
+  const spaceObjects = await initializeSpaceObjects()
   addMeshes(scene, spaceObjects)
 
   // Add some light
@@ -158,7 +158,7 @@ const sketch = ({ context, fps }) => {
 
       // const state = [getGuiParams(), getCurrentTime()] // maybe there's a separate gui file...
       const state = {
-        time: time % .7,
+        time: time,
         visibleTypes: ["star", "planet", "asteroid"],
         visibleGroups: ["solar system", "amor"]
       }
