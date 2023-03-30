@@ -1,3 +1,5 @@
+const highlightColor = 'red'
+
 export default class SpaceObject {
     constructor(name, positions, stepInterval, size, group, startDate) {
         this.name = name
@@ -8,6 +10,7 @@ export default class SpaceObject {
         this.group = group
         this.startDate = startDate
         this.objectMesh = this.createObjectMesh()
+        this.objectColor = 'white'
         this.orbitMesh = this.createOrbitMesh()
     }
 
@@ -15,7 +18,7 @@ export default class SpaceObject {
         const mesh = new THREE.Mesh(
             new THREE.SphereGeometry(this.size, 12, 12),
             new THREE.MeshPhysicalMaterial({
-                color: 'white',
+                color: this.objectColor,
                 roughness: 0.75,
                 flatShading: false
             })
@@ -53,5 +56,10 @@ export default class SpaceObject {
     setVisibility = (isVisible) => {
         this.objectMesh.visible = isVisible
         this.orbitMesh.visible = isVisible
+    }
+
+    setHighlighted = (isHighlighted) => {
+        const color = isHighlighted ? highlightColor : this.objectColor
+        this.objectMesh.material.color.setColorName(color)
     }
 }

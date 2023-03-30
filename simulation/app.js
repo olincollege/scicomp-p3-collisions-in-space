@@ -72,6 +72,10 @@ const sketch = ({ context, fps }) => {
   // Setup camera controller
   const controls = new THREE.OrbitControls(camera, context.canvas);
 
+  // Setup raycaster and cursor
+  const raycaster = new THREE.Raycaster();
+  const mouse = new THREE.Vector2(1, 1);
+
   // Load scene
   const scene = new THREE.Scene();
 
@@ -85,6 +89,24 @@ const sketch = ({ context, fps }) => {
   light.position.set(2, 2, -4).multiplyScalar(1.5);
   scene.add(light);
 
+  // Callback for mouse movement
+  const onMouseMove = (event) => {
+    event.preventDefault();
+    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
+  }
+
+  // Setup event listener for mouse movement
+  window.addEventListener("mousemove", onMouseMove);
+
+  // Highlights objects based on uuid
+  const setHighlightedObjects = (uuid) => {
+    spaceObjects.forEach(spaceObject => {
+      const isHighlighted = (spaceObject.objectMesh.uuid == uuid)
+      spaceObject.setHighlighted(isHighlighted)
+    })
+  }
+
   return {
     // Handle resize events here
     resize({ pixelRatio, viewportWidth, viewportHeight }) {
@@ -95,6 +117,19 @@ const sketch = ({ context, fps }) => {
     },
     // And render events here
     render({ time, deltaTime }) {
+      raycaster.setFromCamera(mouse, camera);
+
+      // Search for intersections between mouse cursor and objects
+      const highlightedObjectIds = []
+      spaceObjects.forEach((spaceObject) => {
+        const intersection = raycaster.intersectObject(spaceObject.objectMesh);
+        if (intersection.length > 0) {
+          highlightedObjectIds.push(intersection[0].object.uuid)
+        }
+      })
+      // If found, highlight in a color
+      setHighlightedObjects(highlightedObjectIds)
+
       // const state = [getGuiParams(), getCurrentTime()] // maybe there's a separate gui file...
       const state = {
         time: time % 1.5,
