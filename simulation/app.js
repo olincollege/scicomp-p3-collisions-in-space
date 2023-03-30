@@ -3,6 +3,8 @@ import random from 'canvas-sketch-util/random';
 import color from 'canvas-sketch-util/color';
 import { mapRange, clamp } from 'canvas-sketch-util/math';
 
+import importData from './importData'
+
 import * as THREE from 'three';
 global.THREE = THREE;
 require("three/examples/js/controls/OrbitControls");
@@ -29,7 +31,8 @@ const Visualizer = {
 
 
 
-const sketch = ({ context, fps }) => {
+const sketch = async ({ context, fps }) => {
+  console.log(await importData())
 
   // Setup renderer
   const initializeRenderer = () => {
