@@ -16,9 +16,9 @@ require("three/examples/js/postprocessing/ShaderPass");
 require("three/examples/js/postprocessing/BloomPass");
 require("three/examples/js/postprocessing/UnrealBloomPass");
 
-import data from './objects.json'
+// import data from './objects.json'
 
-const TIME_STEP_INTERVAL = .1
+const TIME_STEP_INTERVAL = .01
 const DEFAULT_START_DATE = 0
 
 // specific to canvas, not our own params
@@ -35,8 +35,6 @@ const Visualizer = {
 }
 
 const sketch = async ({ context, fps }) => {
-  console.log(await importData())
-
   // Setup renderer
   const initializeRenderer = () => {
     const renderer = new THREE.WebGLRenderer({
@@ -57,7 +55,8 @@ const sketch = async ({ context, fps }) => {
     return camera
   }
 
-  const initializeSpaceObjects = () => {
+  const initializeSpaceObjects = async () => {
+    const data = await importData()
     return data.map(object => {
       return new SpaceObject(
         object.name,
@@ -79,7 +78,6 @@ const sketch = async ({ context, fps }) => {
     })
   }
 
-
   const camera = initializeCamera()
 
   // Setup camera controller
@@ -93,7 +91,7 @@ const sketch = async ({ context, fps }) => {
   const scene = new THREE.Scene();
 
   // Load meshes and add them to scene
-  const spaceObjects = initializeSpaceObjects()
+  const spaceObjects = await initializeSpaceObjects()
   addMeshes(scene, spaceObjects)
 
   // Add some light
@@ -160,7 +158,7 @@ const sketch = async ({ context, fps }) => {
 
       // const state = [getGuiParams(), getCurrentTime()] // maybe there's a separate gui file...
       const state = {
-        time: time % .7,
+        time: time,
         visibleTypes: ["star", "planet", "asteroid"],
         visibleGroups: ["solar system", "amor"]
       }
