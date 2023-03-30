@@ -6,7 +6,7 @@ export default async () => {
   for (const body of rawData) {
     proccessedData.push(processData(body))
   }
-  return proccessedData[0]
+  return proccessedData
 }
 
 const processData = (rawData) => {
