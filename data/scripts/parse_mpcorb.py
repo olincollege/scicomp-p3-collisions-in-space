@@ -10,7 +10,7 @@ from tqdm import tqdm
 
 READ_PATH = "raw/mpcorb_extended.json"
 WRITE_PATH = "processed/orbits.json"
-REQUIRED_FIELDS = ("Number", "a", "e", "i", "Node", "Peri", "M")
+REQUIRED_FIELDS = ("a", "e", "i", "Node", "Peri", "M")
 
 SKIPPED = 0
 PARSED = 0
@@ -25,8 +25,13 @@ def valid_object(obj):
     return True
 
 
-def parse_object(obj):
-    id_ = obj["Number"][1:-1]  # Remove '(' and ')'
+def parse_object(i, obj):
+    if "Number" in obj:
+        id_ = int(obj["Number"][1:-1])  # Remove '(' and ')'
+    else:
+        # Ad-hoc fix for ~half the entries that are missing the Number field
+        # Howerver, does hold true for the 600,000 entries that have the Number field
+        id_ = i + 1
 
     # Ellipse params
     e, a = obj["e"], obj["a"]
@@ -55,13 +60,11 @@ def parse_file():
     print(f"Parsing '{READ_PATH}'...")
     with open(READ_PATH, "r") as rf:
         data = json_stream.load(rf)
-        for obj in tqdm(data.persistent()):
+        for i, obj in enumerate(tqdm(data.persistent())):
             if not valid_object(obj):
-                print(obj)
-                input()
                 SKIPPED += 1
                 continue
-            space_object = parse_object(obj)
+            space_object = parse_object(i, obj)
             PARSED += 1
             yield space_object
 
