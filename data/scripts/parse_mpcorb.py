@@ -10,7 +10,10 @@ from tqdm import tqdm
 
 READ_PATH = "raw/mpcorb_extended.json"
 WRITE_PATH = "processed/orbits.json"
-REQUIRED_FIELDS = ("Name", "Number", "a", "e", "i", "Node", "Peri", "M")
+REQUIRED_FIELDS = ("Number", "a", "e", "i", "Node", "Peri", "M")
+
+SKIPPED = 0
+PARSED = 0
 
 
 def valid_object(obj):
@@ -36,7 +39,7 @@ def parse_object(obj):
     true_anomaly = math.degrees(true_anomaly)
 
     return {
-        "name": obj["Name"],
+        "name": obj.get("Name", "Un-Named"),
         "id": id_,
         "semi-major": a,
         "semi-minor": b,
@@ -48,13 +51,18 @@ def parse_object(obj):
 
 
 def parse_file():
+    global SKIPPED, PARSED
     print(f"Parsing '{READ_PATH}'...")
     with open(READ_PATH, "r") as rf:
         data = json_stream.load(rf)
         for obj in tqdm(data.persistent()):
             if not valid_object(obj):
+                print(obj)
+                input()
+                SKIPPED += 1
                 continue
             space_object = parse_object(obj)
+            PARSED += 1
             yield space_object
 
 
@@ -64,6 +72,8 @@ def main():
         generator = parse_file()
         json.dump(streamable_list(generator), wf)
     print("Parsing complete.")
+    print(f"Skipped {SKIPPED} entries.")
+    print(f"Parsed  {PARSED} entries.")
 
 if __name__ == "__main__":
     main()
