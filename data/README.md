@@ -55,7 +55,6 @@ The resulting json object is created as `/processerd/orbits.json` and is an arra
 * `semi-major`: Size of the semi-major axis of the orbit in m.
 * `semi-minor`: Size of the semi-minor axis of the orbit in m.
 * `i`: Inclination of the orbit in degrees. (Rotation from the xy-plane.)
-* `node`: Longitude of the ascending node of the orbit in degrees. (Rotation
-  `around the z-axis.)
+* `node`: Longitude of the ascending node of the orbit in degrees. (Rotation around the z-axis.)
 * `peri`: Argument of the periapsis of the orbit in degrees.
 * `v`: True anomaly of the asteroid in degrees.
