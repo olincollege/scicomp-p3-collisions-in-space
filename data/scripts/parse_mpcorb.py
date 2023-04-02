@@ -61,6 +61,7 @@ def parse_object(i, obj):
         },
         "semi-major": au_to_m(a),
         "semi-minor": au_to_m(b),
+        "c": au_to_m(c),
         "i": obj["i"],
         "node": obj["Node"],
         "peri": obj["Peri"],
