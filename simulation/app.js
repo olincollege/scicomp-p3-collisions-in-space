@@ -2,7 +2,7 @@ import canvasSketch from 'canvas-sketch';
 
 import updateSpaceObjects from './simulation'
 import SpaceObject from './spaceObject';
-import importData from './importData'
+import orbits from '../data/processed/orbits.json'
 
 import * as THREE from 'three';
 global.THREE = THREE;
@@ -16,10 +16,7 @@ require("three/examples/js/postprocessing/ShaderPass");
 require("three/examples/js/postprocessing/BloomPass");
 require("three/examples/js/postprocessing/UnrealBloomPass");
 
-// import data from './objects.json'
-
-const TIME_STEP_INTERVAL = .01
-const DEFAULT_START_DATE = 0
+const cameraMaxRenderDepth = 100000000000000
 
 // specific to canvas, not our own params
 const settings = {
@@ -48,25 +45,19 @@ const sketch = async ({ context, fps }) => {
 
   // Setup a camera
   const initializeCamera = () => {
-    const camera = new THREE.PerspectiveCamera(45, 1, 0.01, 50000);
-    camera.position.set(0, 100, -40);
+    const camera = new THREE.PerspectiveCamera(45, 1, 0.01, cameraMaxRenderDepth);
+    camera.position.set(0, 0, -10000000000000);
+    // camera.position.set(0, 100, -40);
+    // camera.position.set(-257266943572.55502, 1278902912689.48334, -10344663167.244013);
     camera.lookAt(new THREE.Vector3())
 
     return camera
   }
 
-  const initializeSpaceObjects = async () => {
-    const data = await importData()
-    return data.map(object => {
+  const initializeSpaceObjects = () => {
+    return orbits.map(orbit => {
       return new SpaceObject(
-        object.name,
-        object.type,
-        object.group,
-        object.size,
-        object.positions,
-        TIME_STEP_INTERVAL,
-        DEFAULT_START_DATE,
-        object.color
+        orbit, "asteroid", "group name", 'grey'
       )
     })
   }
@@ -91,7 +82,7 @@ const sketch = async ({ context, fps }) => {
   const scene = new THREE.Scene();
 
   // Load meshes and add them to scene
-  const spaceObjects = await initializeSpaceObjects()
+  const spaceObjects = initializeSpaceObjects()
   addMeshes(scene, spaceObjects)
 
   // Add some light
@@ -156,11 +147,10 @@ const sketch = async ({ context, fps }) => {
       // If found, highlight in a color
       setHighlightedObjects(highlightedObjectIds)
 
-      // const state = [getGuiParams(), getCurrentTime()] // maybe there's a separate gui file...
       const state = {
         time: time,
         visibleTypes: ["star", "planet", "asteroid"],
-        visibleGroups: ["solar system", "amor"]
+        visibleGroups: ["group name"]
       }
 
       updateSpaceObjects(spaceObjects, state)

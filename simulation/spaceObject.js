@@ -1,28 +1,47 @@
-const highlightColor = 'red'
+import { degToRad } from "three/src/math/MathUtils"
+
+const scaleFactor = 1
+const defaultObjectSize = 5000000000
+
 const defaultColorMap = {
-    'star': 'yellow',
-    'planet': 'pink',
-    'asteroid': 'grey'
+    'star': { object: 'yellow', orbit: 'black' },
+    'planet': { object: 'pink', orbit: 'purple' },
+    'asteroid': { object: 'grey', orbit: 'grey' }
 }
+const defaultOrbitColor = 'grey'
+const objectHighlightColor = 'red'
+const orbitHighlightColor = 'blue'
 
 export default class SpaceObject {
-    constructor(name, type, group, size, positions, stepInterval, startDate, color = '') {
-        this.name = name
+    constructor(orbit, type, group, color = '') {
+        // data available from processed data
+        this.name = orbit["name"]
+        this.id = orbit["id"]
+        this.pos = orbit["pos"]
+        this.semimajor = orbit["semi-major"]
+        this.semiminor = orbit["semi-minor"]
+        this.i = orbit["i"]
+        this.node = orbit["node"]
+        this.peri = orbit["peri"]
+        this.v = orbit["v"]
+
+        // attributes to configure manually
         this.type = type
         this.group = group
-        this.size = size
-        this.positions = positions
-        this.currentPosition = this.positions[0]
-        this.stepInterval = stepInterval
-        this.startDate = startDate
-        this.objectMesh = this.createObjectMesh()
-        this.orbitMesh = this.createOrbitMesh()
-
         if (color == '') {
-            this.objectColor = defaultColorMap[type]
+            this.objectColor = defaultColorMap[type].object
+            this.orbitColor = defaultColorMap[type].orbit
         } else {
             this.objectColor = color
+            this.orbitColor = defaultOrbitColor
         }
+
+        // size should be pulled from a database
+        this.size = defaultObjectSize
+
+        // initialize object meshes
+        this.objectMesh = this.createObjectMesh()
+        this.orbitMesh = this.createOrbitMesh()
     }
 
     createObjectMesh = () => {
@@ -35,35 +54,34 @@ export default class SpaceObject {
                 emissive: (this.type == 'star') ? 'yellow' : 'black',
             })
         )
-        mesh.position.x = this.currentPosition.x
-        mesh.position.y = this.currentPosition.y
-        mesh.position.z = this.currentPosition.z
+        mesh.position.set(this.pos.x * scaleFactor, this.pos.y * scaleFactor, this.pos.z * scaleFactor)
+
         return mesh
     }
 
     createOrbitMesh = () => {
-        let points = this.positions.map((position) => {
-            return new THREE.Vector3(position.x, position.y, position.z)
-        })
+        console.log(this.semimajor, this.semimajor)
+        const curve = new THREE.EllipseCurve(
+            0, 0,
+            this.semimajor * scaleFactor, this.semiminor * scaleFactor,
+            0, 2 * Math.PI,
+            false,
+            degToRad(this.peri),
+        );
+        const points = curve.getPoints(128);
 
-        const material = new THREE.LineBasicMaterial({ color: 0x0000ff });
+        const material = new THREE.LineBasicMaterial({ color: this.orbitColor });
         const geometry = new THREE.BufferGeometry().setFromPoints(points);
-        return new THREE.Line(geometry, material);
-    }
 
-    updateMeshPosition = (position) => {
-        this.objectMesh.position.x = position.x
-        this.objectMesh.position.y = position.y
-        this.objectMesh.position.z = position.z
-    }
+        const line = new THREE.Line(geometry, material);
 
-    updatePositionAtTime = (time) => {
-        let positionIndex = Math.round(time / this.stepInterval)
-        // ensure no indices are generated out of range
-        positionIndex = Math.min(positionIndex, this.positions.length - 1)
-        const newPosition = this.positions[positionIndex]
-        this.currentPosition = newPosition
-        this.updateMeshPosition(newPosition)
+        const orbitMesh = new THREE.Object3D()
+        orbitMesh.add(line)
+
+        orbitMesh.rotateZ(degToRad(this.node))
+        orbitMesh.rotateX(degToRad(this.i))
+        console.log(orbitMesh)
+        return orbitMesh
     }
 
     setVisibility = (isVisible) => {
@@ -72,7 +90,13 @@ export default class SpaceObject {
     }
 
     setHighlighted = (isHighlighted) => {
-        const color = isHighlighted ? highlightColor : this.objectColor
-        this.objectMesh.material.color.setColorName(color)
+        const objectColor = isHighlighted ? objectHighlightColor : this.objectColor
+        this.objectMesh.material.color.setColorName(objectColor)
+        const orbitColor = isHighlighted ? orbitHighlightColor : this.orbitColor
+        this.orbitMesh.children[0].material.color.setColorName(orbitColor)
+
+        // only show orbit when highlighted
+        // this.orbitMesh.children[0].material.color.setColorName(orbitColor)
+        // this.orbitMesh.visible = isHighlighted
     }
 }
