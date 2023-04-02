@@ -9,7 +9,8 @@ Before running any scripts:
 1. (Recommended) Setup and activate a virtual environment:
 
 ```
-python -m vevn venv
+cd data/
+python -m venv venv
 source venv/bin/activate
 ```
 
@@ -35,7 +36,7 @@ source venv/bin/activate
 
 The MPC orbital data can be downloaded from
 [here](https://minorplanetcenter.net/Extended_Files/mpcorb_extended.json.gz).
-Then, move the file to `raw`, unzip the file and run the python script:
+Then, move the file to `raw`, unzip the file and run the following python script. Note that it may take a few minutes for data to be parsed.
 
 ```
 mv ~/Downloads/mpcorb_extended.json.gz raw/.  # Assumes Downloads directory
@@ -43,7 +44,7 @@ gunzip raw/.
 python script/parse_mpcord.py
 ```
 
-The resulting json object is an array where each object has the keys:
+The resulting json object is created as `/processerd/orbits.json` and is an array where each object has the keys:
 
 * `name`: The name of the asteroid, "Un-Named" if not set in the MPC data.
 * `id`: Numerical designation of the asteroid.
