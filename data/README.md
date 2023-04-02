@@ -47,8 +47,12 @@ The resulting json object is an array where each object has the keys:
 
 * name: The name of the asteroid, "Un-Named" if not set in the MPC data.
 * id: Numerical designation of the asteroid.
-* semi-major: Size of the semi-major axis of the orbit in AU.
-* semi-minor: Size of the semi-minor axis of the orbit in AU.
+* pos: dict containing:
+  * x: X coordinate of the asteroid in m.
+  * y: Y coordinate of the asteroid in m.
+  * z: Z coordinate of the asteroid in m.
+* semi-major: Size of the semi-major axis of the orbit in m.
+* semi-minor: Size of the semi-minor axis of the orbit in m.
 * i: Inclination of the orbit in degrees. (Rotation from the xy-plane.)
 * node: Longitude of the ascending node of the orbit in degrees. (Rotation
   around the z-axis.)

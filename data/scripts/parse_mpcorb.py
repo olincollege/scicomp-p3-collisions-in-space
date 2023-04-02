@@ -16,6 +16,10 @@ SKIPPED = 0
 PARSED = 0
 
 
+def au_to_m(au):
+    return au * 149597870691
+
+
 def valid_object(obj):
     for field in REQUIRED_FIELDS:
         if field not in obj:
@@ -33,25 +37,34 @@ def parse_object(i, obj):
         # Howerver, does hold true for the 600,000 entries that have the Number field
         id_ = i + 1
 
+    elements = orbital.elements.KeplerianElements(
+        a=au_to_m(obj["a"]),
+        e=obj["e"],
+        i=math.radians(obj["i"]),
+        raan=math.radians(obj["Node"]),
+        arg_pe=math.radians(obj["Peri"]),
+        M0=math.radians(obj["M"]),
+    )
+
     # Ellipse params
     e, a = obj["e"], obj["a"]
     c = e * a  # e = c / a
     b = math.sqrt((a ** 2) - (c ** 2))  # c ** 2 + b ** 2 = a ** 2
 
-    # Positional params
-    mean_anomaly = math.radians(obj["M"])
-    true_anomaly = orbital.utilities.true_anomaly_from_mean(e, mean_anomaly)
-    true_anomaly = math.degrees(true_anomaly)
-
     return {
         "name": obj.get("Name", "Un-Named"),
         "id": id_,
-        "semi-major": a,
-        "semi-minor": b,
+        "pos": {
+            "x": elements.r.x,
+            "y": elements.r.y,
+            "z": elements.r.z,
+        },
+        "semi-major": au_to_m(a),
+        "semi-minor": au_to_m(b),
         "i": obj["i"],
         "node": obj["Node"],
         "peri": obj["Peri"],
-        "v": true_anomaly,
+        "v": math.degrees(elements.f),
     }
 
 
