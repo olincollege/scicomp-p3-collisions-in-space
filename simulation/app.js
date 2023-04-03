@@ -19,7 +19,7 @@ require("three/examples/js/postprocessing/UnrealBloomPass");
 import * as dat from 'dat.gui';
 
 const pathToSurveyJSON = './data/processed/survey_codes.json'
-const pathToOrbitJSON = './data/processed/asteroids some.json'
+const pathToOrbitJSON = './data/processed/asteroids.json'
 
 // Initialize Gui
 var gui = new dat.gui.GUI();
