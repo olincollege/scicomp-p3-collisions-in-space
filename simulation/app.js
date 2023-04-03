@@ -28,10 +28,12 @@ var gui = new dat.gui.GUI();
 
 // Show visualizaton options
 const viewerSettings = {
-  "Show orbits": true
+  "Show orbits": true,
+  "Bloom": true
 }
 const viewerSettingsFolder = gui.addFolder('Viewer');
 viewerSettingsFolder.add(viewerSettings, "Show orbits")
+viewerSettingsFolder.add(viewerSettings, "Bloom")
 viewerSettingsFolder.open()
 
 // Track visibility of bodies by type
@@ -316,9 +318,7 @@ const sketch = async ({ context, fps }) => {
     const isOrbitVisible = viewerSettings['Show orbits']
     try {
       orbitMesh.visible = isOrbitVisible
-    } catch {
-
-    }
+    } catch { }
     // Object.values(spaceObjects).forEach(spaceObjectsArray => {
     //   spaceObjectsArray.forEach((spaceObject) => {
     //     const isSpaceObjectVisible = bodyTypesVisibility[spaceObject.type]
@@ -356,6 +356,7 @@ const sketch = async ({ context, fps }) => {
       // const highlightedObjectIds = checkForHighlightedObjects()
       // highlightObjectsByID(highlightedObjectIds)
 
+      bloomPass.enabled = viewerSettings.Bloom
       controls.update();
       composer.render();
     },
