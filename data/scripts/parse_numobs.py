@@ -36,7 +36,7 @@ def main():
         generator = parse_file()
         json.dump(streamable_list(generator), wf)
     print("Parsing complete.")
-    print(f"Parsed  {PARSED} entries.")
+    print(f"Parsed {PARSED} entries.")
 
 if __name__ == "__main__":
     main()

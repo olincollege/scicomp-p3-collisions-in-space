@@ -35,13 +35,13 @@ source venv/bin/activate
 ### MPC Orbit Data
 
 The MPC orbital data can be downloaded from
-[here](https://minorplanetcenter.net/Extended_Files/mpcorb_extended.json.gz).
+[here](https://www.minorplanetcenter.net/iau/MPCORB/MPCORB.DAT.gz).
 Then, move the file to `raw`, unzip the file and run the following python
 script. Note that it may take a few minutes for data to be parsed.
 
 ```
-mv ~/Downloads/mpcorb_extended.json.gz raw/.  # Assumes Downloads directory
-gunzip raw/.
+mv ~/Downloads/MPCORB.DAT.gz raw/.  # Assumes Downloads directory
+gunzip raw/MPCORB.DAT.gz
 python script/parse_mpcord.py
 ```
 
@@ -49,7 +49,10 @@ The resulting json object is created as `/processed/orbits.json` and is an array
 where each object has the keys:
 
 * `name`: The name of the asteroid, "Un-Named" if not set in the MPC data.
-* `id`: Numerical designation of the asteroid.
+* `number`: Packed 5 digit numerical designation of the asteroid. Null if the asteroid
+  only has a provisional designation.
+* `provisional`: Packed 7 digit provisional designation of the asteroid. Null if
+  the asteroid has been assigned a number.
 * `pos`: dict containing:
   * `x`: X coordinate of the asteroid in m.
   * `y`: Y coordinate of the asteroid in m.
