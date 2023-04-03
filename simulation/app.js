@@ -249,9 +249,9 @@ const sketch = async ({ context, fps }) => {
       let orbitMaterial = new THREE.MeshPhysicalMaterial({
         color: 'blue',
         roughness: 1,
-        flatShading: false,
+        flatShading: true,
       })
-      const orbitGeometry = new THREE.TorusGeometry(1, .001, 3, 128);
+      const orbitGeometry = new THREE.TorusGeometry(1, .0001, 3, 64);
       orbitMesh = new THREE.InstancedMesh(orbitGeometry, orbitMaterial, count)
 
       const dummyObject = new THREE.Object3D()
