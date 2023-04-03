@@ -5,6 +5,8 @@ const oboe = require("oboe")
 import SpaceObject from './spaceObject';
 
 import * as THREE from 'three';
+import { degToRad } from "three/src/math/MathUtils"
+
 global.THREE = THREE;
 require("three/examples/js/controls/OrbitControls");
 require("three/examples/js/shaders/ConvolutionShader");
@@ -231,19 +233,29 @@ const sketch = async ({ context, fps }) => {
     })
   }
 
+  let objectMesh, orbitMesh
+
   const buildInstancedMesh = () => {
     const initMesh = (count) => {
-      let geometry = new THREE.SphereGeometry(1000000000, 3, 3)
-      let material = new THREE.MeshPhysicalMaterial({
+      let objectGeometry = new THREE.SphereGeometry(1000000000, 3, 3)
+      let objectMaterial = new THREE.MeshPhysicalMaterial({
         color: 'grey',
         roughness: 1,
         flatShading: false,
       })
-      let mesh = new THREE.InstancedMesh(geometry, material, count)
+      objectMesh = new THREE.InstancedMesh(objectGeometry, objectMaterial, count)
+      let orbitMaterial = new THREE.MeshPhysicalMaterial({
+        color: 'blue',
+        roughness: 1,
+        flatShading: false,
+      })
+      const orbitGeometry = new THREE.TorusGeometry(1, .001, 3, 128);
+      orbitMesh = new THREE.InstancedMesh(orbitGeometry, orbitMaterial, count)
 
-      const dummy = new THREE.Object3D()
+      const dummyObject = new THREE.Object3D()
+      const dummyOrbit = new THREE.Object3D()
       let i = 0
-      
+
       console.log("Building mesh...")
       oboe({
         url: pathToOrbitJSON,
@@ -254,13 +266,22 @@ const sketch = async ({ context, fps }) => {
             return
           }
           const pos = data.pos
-          dummy.position.set(pos.x, pos.y, pos.z)
-          dummy.updateMatrix();
-          mesh.setMatrixAt(i++, dummy.matrix);
+          dummyObject.position.set(pos.x, pos.y, pos.z)
+          dummyObject.updateMatrix();
+          objectMesh.setMatrixAt(i++, dummyObject.matrix);
+
+          dummyOrbit.rotateY(data.peri) // not sure where this is supposed to go
+          dummyOrbit.rotateZ(degToRad(data.node))
+          dummyOrbit.rotateX(degToRad(data.i))
+          dummyOrbit.scale.set(data["semi-major"] / 2, data["semi-minor"] / 2, data["semi-major"])
+          dummyOrbit.updateMatrix();
+          orbitMesh.setMatrixAt(i++, dummyOrbit.matrix);
+
           return oboe.drop()
         })
         .done(() => {
-          scene.add(mesh)
+          scene.add(objectMesh)
+          scene.add(orbitMesh)
           console.log('Mesh built!')
         })
         .fail(() => {
@@ -293,15 +314,19 @@ const sketch = async ({ context, fps }) => {
   // Show or hide visibility based on body type and view settings
   const updateVisibility = () => {
     const isOrbitVisible = viewerSettings['Show orbits']
+    try {
+      orbitMesh.visible = isOrbitVisible
+    } catch {
 
-    Object.values(spaceObjects).forEach(spaceObjectsArray => {
-      spaceObjectsArray.forEach((spaceObject) => {
-        const isSpaceObjectVisible = bodyTypesVisibility[spaceObject.type]
+    }
+    // Object.values(spaceObjects).forEach(spaceObjectsArray => {
+    //   spaceObjectsArray.forEach((spaceObject) => {
+    //     const isSpaceObjectVisible = bodyTypesVisibility[spaceObject.type]
 
-        spaceObject.setVisibility(isSpaceObjectVisible)
-        spaceObject.setOrbitVisibility(isOrbitVisible && isSpaceObjectVisible)
-      })
-    })
+    //     spaceObject.setVisibility(isSpaceObjectVisible)
+    //     spaceObject.setOrbitVisibility(isOrbitVisible && isSpaceObjectVisible)
+    //   })
+    // })
   }
 
   buildInstancedMesh()
@@ -324,8 +349,8 @@ const sketch = async ({ context, fps }) => {
       //   prevSurveysVisibility = JSON.parse(JSON.stringify(surveysVisibility))
       // }
 
-      // // Show/hide objects based on type selection and view settings
-      // updateVisibility()
+      // Show/hide objects based on type selection and view settings
+      updateVisibility()
 
       // // Check if hovering over any objects, if so highlight in a color
       // const highlightedObjectIds = checkForHighlightedObjects()
