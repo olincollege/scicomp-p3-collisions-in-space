@@ -1,7 +1,5 @@
 # Data
 
-The data necessary for running our simulation.
-
 ## Setup
 
 Before running any scripts:
@@ -19,6 +17,49 @@ source venv/bin/activate
 ```
 pip install -r requirements.txt
 ```
+
+## Quickstart
+
+To generate the data necessary to run the visualization, either setup each
+below dataset individually, or do the following:
+
+1. Download the MPC orbital data:
+  1. Get the data from
+      [here](https://www.minorplanetcenter.net/iau/MPCORB/MPCORB.DAT.gz).
+  2. Move the orbital data to `raw`:
+
+  ```
+  mv ~/Downloads/MPCORB.DAT.gz raw/.  # Assumes Downloads directory
+  gunzip raw/MPCORB.DAT.gz
+  ```
+
+2. Download the MPC observations data:
+  1. Get the data from
+     [here](https://www.minorplanetcenter.net/iau/ECS/MPCAT-OBS/NumObs.txt.gz).
+  2. Move the observation data to `raw`:
+
+  ```
+  mv ~/Downloads/NumObs.txt.gz raw/.  # Assumes Downloads directory
+  gunzip raw/NumObs.txt.gz
+  ```
+3. Download the MPC surveys data:
+  1. Get the data from
+     [here](https://www.minorplanetcenter.net/iau/lists/ObsCodes.html). (Must
+     save the page as a local file.)
+  2. Move the survey data to `raw`:
+
+  ```
+  mv ~/Downloads/ObsCodes.html raw/.  # Assumes Downloads directory
+  ```
+
+4. Run the data parsing script (this will take some time):
+
+```
+source venv/bin/activate  # Ensure the venv is active
+python scripts/parse_data.py
+```
+
+See below for documentation on the contents of the generated data.
 
 ## Datasets
 
