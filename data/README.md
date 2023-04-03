@@ -34,6 +34,8 @@ source venv/bin/activate
 
 ### MPC Orbit Data
 
+The orbital data for all asteroids tracked by the MPC.
+
 The MPC orbital data can be downloaded from
 [here](https://www.minorplanetcenter.net/iau/MPCORB/MPCORB.DAT.gz).
 Then, move the file to `raw`, unzip the file and run the following python
@@ -68,7 +70,9 @@ where each object has the keys:
 
 ### MPC Survey Attribution Data
 
-All MPC observations can be downloaded
+A mapping of numbered asteroids to the survey IDs that first discovered them.
+
+The MPC observations can be downloaded
 [here](https://www.minorplanetcenter.net/iau/ECS/MPCAT-OBS/NumObs.txt.gz).
 Then, move the file to `raw`, unzip the file and run the following python
 script. Note that it may take a few minutes for data to be parsed.
@@ -88,3 +92,24 @@ is an array where each object has the keys:
   * `year`: Year of entry.
   * `month`: Month of entry.
   * `Day`: Day of entry.
+
+
+### MPC Survey Code Data
+
+A mapping of survey IDs to survey names.
+
+The survey codes can be downloaded
+[here](https://www.minorplanetcenter.net/iau/lists/ObsCodes.html). (Must save
+the page as a local file.) Then, move the file to `raw` and run the following
+python script.
+
+```
+mv ~/Downloads/ObsCodes.html raw/.  # Assumes Downloads directory
+python script/parse_obscodes.py
+```
+
+The resulting json object is created as `/processed/survey_codes.json` and
+is an array where each object has the keys:
+
+* `surveyId`: 3 letter survey ID.
+* `name`: Survey name.
