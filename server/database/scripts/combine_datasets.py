@@ -82,7 +82,7 @@ def unlinked_orbit(orbit):
             "day": None,
         },
     })
-
+    return orbit
 
 
 def fill_cache(observations, cache, i=10000):
