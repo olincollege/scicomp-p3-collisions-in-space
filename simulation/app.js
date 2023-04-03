@@ -41,11 +41,23 @@ oboe({
 })
   .node('!*.', function (surveyName) {
     surveysVisibility[surveyName] = false
-    surveysFolder.add(surveysVisibility, surveyName)
   })
   .done(() => {
+    // Sort survey list
+    surveysVisibility = Object.keys(surveysVisibility)
+      .sort().reduce(
+        (obj, key) => {
+          obj[key] = surveysVisibility[key];
+          return obj;
+        },
+        {}
+      );
+
+    // Add to menu
+    Object.entries(surveysVisibility).forEach(([surveyName, state]) => {
+      surveysFolder.add(surveysVisibility, surveyName)
+    });
     console.log('Loaded survey list!')
-    console.log(surveysVisibility)
   })
   .fail(() => {
     console.error('Failed to load survey list!')
