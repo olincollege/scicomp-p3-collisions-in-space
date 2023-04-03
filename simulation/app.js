@@ -2,7 +2,6 @@ import canvasSketch from 'canvas-sketch';
 
 const oboe = require("oboe")
 
-import updateSpaceObjects from './simulation'
 import SpaceObject from './spaceObject';
 
 import * as THREE from 'three';
@@ -22,16 +21,21 @@ import * as dat from 'dat.gui';
 const pathToSurveyJSON = './data/processed/survey_codes.json'
 const pathToOrbitJSON = './data/processed/asteroids some.json'
 
+// Initialize Gui
 var gui = new dat.gui.GUI();
 
+// Track visibility of bodies by type
 const bodyTypesVisibility = { "Stars": true, "Planets": true, "Asteroids": true }
 const bodyTypesFolder = gui.addFolder('Body Types');
 
 Object.entries(bodyTypesVisibility).forEach(([bodyType, state]) => {
   bodyTypesFolder.add(bodyTypesVisibility, bodyType)
 });
+bodyTypesFolder.open()
 
+// Track visibility of bodies by survey
 let surveysVisibility = {}
+let prevSurveysVisibility = {}
 const surveysFolder = gui.addFolder('Surveys');
 
 // Fetch survey lists and show in gui
@@ -57,12 +61,14 @@ oboe({
     Object.entries(surveysVisibility).forEach(([surveyName, state]) => {
       surveysFolder.add(surveysVisibility, surveyName)
     });
+    surveysFolder.open()
     console.log('Loaded survey list!')
   })
   .fail(() => {
     console.error('Failed to load survey list!')
   });
 
+// set camera render limits
 const cameraMinRenderDepth = 1e10
 const cameraMaxRenderDepth = 1e14
 
@@ -73,12 +79,7 @@ const settings = {
   context: 'webgl',
 };
 
-const Visualizer = {
-  currentTime: 1,
-  currentView: "view",
-  currentSpaceObjects: ["spaceObject"]
-}
-
+// Main sketch function
 const sketch = async ({ context, fps }) => {
   // Setup renderer
   const initializeRenderer = () => {
@@ -91,6 +92,7 @@ const sketch = async ({ context, fps }) => {
     return renderer;
   }
 
+  // Configure camera to look at scene
   const initializeCamera = () => {
     const camera = new THREE.PerspectiveCamera(45, 1, cameraMinRenderDepth, cameraMaxRenderDepth);
     camera.position.z = 5000000000000;
@@ -119,24 +121,7 @@ const sketch = async ({ context, fps }) => {
   scene.add(sun);
 
   // Load meshes and add them to scene
-  let spaceObjects = []
-  oboe({
-    url: pathToOrbitJSON,
-    headers: { "Access-Control-Allow-Headers": "*" }
-  })
-    .node('!.*', function (data) {
-      const spaceObject = new SpaceObject(
-        data, "Asteroids", 'grey'
-      )
-      scene.add(spaceObject.mesh)
-      spaceObjects.push(spaceObject)
-    })
-    .done(() => {
-      console.log('Loaded space objects!')
-    })
-    .fail(() => {
-      console.error('Failed to load space objects!')
-    });
+  let spaceObjects = {}
 
   // Set up renderer and render pass
   const renderer = initializeRenderer()
@@ -164,11 +149,95 @@ const sketch = async ({ context, fps }) => {
   // Setup event listener for mouse movement
   window.addEventListener("mousemove", onMouseMove);
 
+  const checkForHighlightedObjects = () => {
+    raycaster.setFromCamera(mouse, camera);
+
+    // Search for intersections between mouse cursor and objects
+    const highlightedObjectIds = []
+    Object.values(spaceObjects).forEach(spaceObjectsArray => {
+      spaceObjectsArray.forEach((spaceObject) => {
+        const intersection = raycaster.intersectObject(spaceObject.objectMesh);
+        if (intersection.length > 0) {
+          highlightedObjectIds.push(intersection[0].object.uuid)
+        }
+      })
+    })
+
+    return highlightedObjectIds
+  }
+
   // Highlights objects based on uuid
-  const setHighlightedObjects = (uuid) => {
-    spaceObjects.forEach(spaceObject => {
-      const isHighlighted = (spaceObject.objectMesh.uuid == uuid)
-      spaceObject.setHighlighted(isHighlighted)
+  const highlightObjectsByID = (uuid) => {
+    Object.values(spaceObjects).forEach(spaceObjectsArray => {
+      spaceObjectsArray.forEach(spaceObject => {
+        const isHighlighted = (spaceObject.objectMesh.uuid == uuid)
+        spaceObject.setHighlighted(isHighlighted)
+      })
+    })
+  }
+
+  const loadObjectsBySurveys = () => {
+    // Update list of visible surveys
+    let visibleSurveys = []
+    Object.entries(surveysVisibility).filter(([survey, isVisible]) => {
+      if (isVisible) {
+        visibleSurveys.push(survey)
+      }
+    });
+
+    // Load objects
+    oboe({
+      url: pathToOrbitJSON,
+      headers: { "Access-Control-Allow-Headers": "*" }
+    })
+      .node('!.*', function (data) {
+        if (data != null) {
+          if (visibleSurveys.includes(data.survey)) {
+            const spaceObject = new SpaceObject(
+              data, "Asteroids", 'grey'
+            )
+            if (typeof (spaceObjects[data.survey]) == "undefined") {
+              spaceObjects[data.survey] = [spaceObject]
+            } else {
+              spaceObjects[data.survey].push(spaceObject)
+            }
+            scene.add(spaceObject.mesh)
+            spaceObjects.push(spaceObject)
+          }
+        }
+      })
+      .done(() => {
+        console.log('Loaded requested space objects!')
+      })
+      .fail(() => {
+        console.error('Failed to load space objects!')
+      });
+
+    // Unload objects
+    Object.keys(spaceObjects).forEach(survey => {
+      if (!visibleSurveys.includes(survey)) {
+        spaceObjects[survey].forEach(spaceObject => {
+          scene.remove(spaceObject.mesh)
+        })
+        delete spaceObjects[survey]
+      }
+    })
+
+    // Update visibility by body type
+    Object.values(spaceObjects).forEach(spaceObjectsArray => {
+      spaceObjectsArray.forEach((spaceObject) => {
+        const isVisible = bodyTypesVisibility[spaceObject.type]
+        spaceObject.setVisibility(isVisible)
+      })
+    })
+  }
+
+  const showObjectsByType = () => {
+    Object.values(spaceObjects).forEach(spaceObjectsArray => {
+      spaceObjectsArray.forEach((spaceObject) => {
+        const isVisible = bodyTypesVisibility[spaceObject.type]
+        spaceObject.setVisibility(isVisible)
+      })
     })
   }
 
@@ -182,21 +251,20 @@ const sketch = async ({ context, fps }) => {
     },
     // And render events here
     render({ time, deltaTime }) {
-      raycaster.setFromCamera(mouse, camera);
 
-      // Search for intersections between mouse cursor and objects
-      const highlightedObjectIds = []
-      spaceObjects.forEach((spaceObject) => {
-        const intersection = raycaster.intersectObject(spaceObject.objectMesh);
-        if (intersection.length > 0) {
-          highlightedObjectIds.push(intersection[0].object.uuid)
-        }
-      })
-      // If found, highlight in a color
-      setHighlightedObjects(highlightedObjectIds)
+      // Load current objects based on filter visibility
+      if (JSON.stringify(surveysVisibility) !== JSON.stringify(prevSurveysVisibility)) {
+        // need to do a more complex list of objects to unload and objects to load
+        loadObjectsBySurveys()
+        prevSurveysVisibility = JSON.parse(JSON.stringify(surveysVisibility))
+      }
 
-      // Update visibility based on filters
-      updateSpaceObjects(spaceObjects, bodyTypesVisibility, surveysVisibility)
+      // Show/hide objects based on type selection
+      showObjectsByType()
+
+      // Check if hovering over any objects, if so highlight in a color
+      const highlightedObjectIds = checkForHighlightedObjects()
+      highlightObjectsByID(highlightedObjectIds)
 
       controls.update();
       composer.render();

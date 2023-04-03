@@ -45,7 +45,6 @@ export default class SpaceObject {
         // initialize object meshes
         this.objectMesh = this.createObjectMesh()
         this.orbitMesh = this.createOrbitMesh()
-        this.orbitMesh.visible = false
 
         // nest in an object and apply transforms to that object
         this.mesh = new THREE.Object3D()
