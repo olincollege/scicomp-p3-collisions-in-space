@@ -2,6 +2,7 @@ import canvasSketch from 'canvas-sketch';
 
 import updateSpaceObjects from './simulation'
 import SpaceObject from './spaceObject';
+import importData from './importData';
 import orbits from '../data/processed/orbits.json'
 
 import * as THREE from 'three';
@@ -16,7 +17,8 @@ require("three/examples/js/postprocessing/ShaderPass");
 require("three/examples/js/postprocessing/BloomPass");
 require("three/examples/js/postprocessing/UnrealBloomPass");
 
-const cameraMaxRenderDepth = 100000000000000
+const cameraMinRenderDepth = 1e10
+const cameraMaxRenderDepth = 1e14
 
 // specific to canvas, not our own params
 const settings = {
@@ -45,10 +47,9 @@ const sketch = async ({ context, fps }) => {
 
   // Setup a camera
   const initializeCamera = () => {
-    const camera = new THREE.PerspectiveCamera(45, 1, 0.01, cameraMaxRenderDepth);
-    camera.position.set(0, 0, -10000000000000);
-    // camera.position.set(0, 100, -40);
-    // camera.position.set(-257266943572.55502, 1278902912689.48334, -10344663167.244013);
+    const camera = new THREE.PerspectiveCamera(45, 1, cameraMinRenderDepth, cameraMaxRenderDepth);
+    camera.position.z = 10000000000000;
+    camera.rotation.y = Math.PI
     camera.lookAt(new THREE.Vector3())
 
     return camera
