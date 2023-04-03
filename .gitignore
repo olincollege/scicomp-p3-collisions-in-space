@@ -2,8 +2,8 @@ node_modules
 package-lock.json
 
 venv
-data/raw
-data/processed
+server/database/raw
+server/database/processed
 __pycache__
 
 */.*
