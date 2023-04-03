@@ -65,12 +65,12 @@ const parseVectorField = (vectorField) => {
     const vectors = lines[i + 2]
 
     let time = times.match(/^\d+\.\d+/)[0]
-    time = parseFloat(time) 
+    time = parseFloat(time)
     timestamps.push(time)
 
     const splitPositions = linePositions.match(/-?\d+\.\d+E\+\d\d/g)
     const parsedPositions = splitPositions.map((pos) => {
-      let [ num, e ] = pos.split("E")
+      let [num, e] = pos.split("E")
       num = parseFloat(num)
       e = parseFloat(e)
       num = num * (10 ** e)

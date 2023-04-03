@@ -1,9 +1,9 @@
 import canvasSketch from 'canvas-sketch';
 
+const oboe = require("oboe")
+
 import updateSpaceObjects from './simulation'
 import SpaceObject from './spaceObject';
-import importData from './importData';
-import orbits from '../data/processed/orbits.json'
 
 import * as THREE from 'three';
 global.THREE = THREE;
@@ -16,6 +16,8 @@ require("three/examples/js/postprocessing/RenderPass");
 require("three/examples/js/postprocessing/ShaderPass");
 require("three/examples/js/postprocessing/BloomPass");
 require("three/examples/js/postprocessing/UnrealBloomPass");
+
+const pathToOrbitJSON = './data/processed/orbits all.json'
 
 const cameraMinRenderDepth = 1e10
 const cameraMaxRenderDepth = 1e14
@@ -45,30 +47,16 @@ const sketch = async ({ context, fps }) => {
     return renderer;
   }
 
-  // Setup a camera
   const initializeCamera = () => {
     const camera = new THREE.PerspectiveCamera(45, 1, cameraMinRenderDepth, cameraMaxRenderDepth);
-    camera.position.z = 10000000000000;
+    camera.position.z = 5000000000000;
     camera.rotation.y = Math.PI
     camera.lookAt(new THREE.Vector3())
 
     return camera
   }
 
-  const initializeSpaceObjects = () => {
-    return orbits.map(orbit => {
-      return new SpaceObject(
-        orbit, "asteroid", "group name", 'grey'
-      )
-    })
-  }
-
-  const addMeshes = (scene, spaceObjects) => {
-    spaceObjects.forEach((spaceObject) => {
-      scene.add(spaceObject.mesh)
-    })
-  }
-
+  // Setup a camera
   const camera = initializeCamera()
 
   // Setup camera controller
@@ -81,14 +69,30 @@ const sketch = async ({ context, fps }) => {
   // Load scene
   const scene = new THREE.Scene();
 
-  // Load meshes and add them to scene
-  const spaceObjects = initializeSpaceObjects()
-  addMeshes(scene, spaceObjects)
-
   // Add some light
   scene.add(new THREE.AmbientLight('white', .4));
   const sun = new THREE.PointLight('white', .8);
   scene.add(sun);
+
+  // Load meshes and add them to scene
+  let spaceObjects = []
+  oboe({
+    url: pathToOrbitJSON,
+    headers: { "Access-Control-Allow-Headers": "*" }
+  })
+    .node('!.*', function (data) {
+      const spaceObject = new SpaceObject(
+        data, "asteroid", "group name", 'grey'
+      )
+      scene.add(spaceObject.mesh)
+      spaceObjects.push(spaceObject)
+    })
+    .done(() => {
+      console.log('Loaded space objects!')
+    })
+    .fail(() => {
+      console.error('Failed to load space objects!')
+    });
 
   // Set up renderer and render pass
   const renderer = initializeRenderer()
