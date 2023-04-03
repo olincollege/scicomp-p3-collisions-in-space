@@ -82,7 +82,7 @@ following python script. Note that it may take a few minutes for data to be
 parsed. 
 
 ```
-python script/combine_datasets.py
+python scripts/combine_datasets.py
 ```
 
 The resulting json object is created as `/processed/asteroids.json` and is an array
@@ -124,7 +124,7 @@ script. Note that it may take a few minutes for data to be parsed.
 ```
 mv ~/Downloads/MPCORB.DAT.gz raw/.  # Assumes Downloads directory
 gunzip raw/MPCORB.DAT.gz
-python script/parse_mpcord.py
+python scripts/parse_mpcord.py
 ```
 
 The resulting json object is created as `/processed/orbits.json` and is an array
@@ -160,7 +160,7 @@ script. Note that it may take a few minutes for data to be parsed.
 ```
 mv ~/Downloads/NumObs.txt.gz raw/.  # Assumes Downloads directory
 gunzip raw/NumObs.txt.gz
-python script/parse_numobs.py
+python scripts/parse_numobs.py
 ```
 
 The resulting json object is created as `/processed/survey_attribution.json` and
@@ -185,7 +185,7 @@ python script.
 
 ```
 mv ~/Downloads/ObsCodes.html raw/.  # Assumes Downloads directory
-python script/parse_obscodes.py
+python scripts/parse_obscodes.py
 ```
 
 The resulting json object is created as `/processed/survey_codes.json` and
