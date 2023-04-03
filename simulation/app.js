@@ -20,12 +20,18 @@ require("three/examples/js/postprocessing/UnrealBloomPass");
 import * as dat from 'dat.gui';
 
 const pathToSurveyJSON = './data/processed/survey_codes.json'
-const pathToOrbitJSON = './data/processed/asteroids partial.json'
-
-let surveysVisibility = {}
+const pathToOrbitJSON = './data/processed/asteroids some.json'
 
 var gui = new dat.gui.GUI();
 
+const bodyTypesVisibility = { "Stars": true, "Planets": true, "Asteroids": true }
+const bodyTypesFolder = gui.addFolder('Body Types');
+
+Object.entries(bodyTypesVisibility).forEach(([bodyType, state]) => {
+  bodyTypesFolder.add(bodyTypesVisibility, bodyType)
+});
+
+let surveysVisibility = {}
 const surveysFolder = gui.addFolder('Surveys');
 
 // Fetch survey lists and show in gui
@@ -35,8 +41,7 @@ oboe({
 })
   .node('!*.', function (surveyName) {
     surveysVisibility[surveyName] = false
-    surveysFolder.add(surveysVisibility, surveyName).onChange(function (value) {
-    });
+    surveysFolder.add(surveysVisibility, surveyName)
   })
   .done(() => {
     console.log('Loaded survey list!')
@@ -109,7 +114,7 @@ const sketch = async ({ context, fps }) => {
   })
     .node('!.*', function (data) {
       const spaceObject = new SpaceObject(
-        data, "asteroid", "group name", 'grey'
+        data, "Asteroids", 'grey'
       )
       scene.add(spaceObject.mesh)
       spaceObjects.push(spaceObject)
@@ -178,13 +183,8 @@ const sketch = async ({ context, fps }) => {
       // If found, highlight in a color
       setHighlightedObjects(highlightedObjectIds)
 
-      const state = {
-        time: time,
-        visibleTypes: ["star", "planet", "asteroid"],
-        visibleGroups: ["group name"]
-      }
-
-      updateSpaceObjects(spaceObjects, state)
+      // Update visibility based on filters
+      updateSpaceObjects(spaceObjects, bodyTypesVisibility, surveysVisibility)
 
       controls.update();
       composer.render();

@@ -1,6 +1,6 @@
 import { degToRad } from "three/src/math/MathUtils"
 
-const defaultObjectSize = 5000000000
+const defaultObjectSize = 10000000000
 
 const defaultColorMap = {
     'star': { object: 'yellow', orbit: 'black' },
@@ -12,7 +12,7 @@ const objectHighlightColor = 'red'
 const orbitHighlightColor = 'blue'
 
 export default class SpaceObject {
-    constructor(orbit, type, group, color = '') {
+    constructor(orbit, type, color = '') {
         // data available from processed data
         this.name = orbit["name"]
         this.id = orbit["id"]
@@ -24,10 +24,10 @@ export default class SpaceObject {
         this.node = orbit["node"]
         this.peri = orbit["peri"]
         this.v = orbit["v"]
+        this.survey = orbit["survey"]
 
         // attributes to configure manually
         this.type = type
-        this.group = group
         if (color == '') {
             this.objectColor = defaultColorMap[type].object
             this.orbitColor = defaultColorMap[type].orbit
@@ -45,6 +45,7 @@ export default class SpaceObject {
         // initialize object meshes
         this.objectMesh = this.createObjectMesh()
         this.orbitMesh = this.createOrbitMesh()
+        this.orbitMesh.visible = false
 
         // nest in an object and apply transforms to that object
         this.mesh = new THREE.Object3D()
@@ -56,7 +57,7 @@ export default class SpaceObject {
 
     createObjectMesh = () => {
         const mesh = new THREE.Mesh(
-            new THREE.SphereGeometry(this.size, 12, 12),
+            new THREE.SphereGeometry(this.size, 3, 3),
             new THREE.MeshPhysicalMaterial({
                 color: this.objectColor,
                 roughness: 1,
@@ -81,7 +82,7 @@ export default class SpaceObject {
     }
 
     createOrbitMesh = () => {
-        const points = this.curve.getPoints(128)
+        const points = this.curve.getPoints(32)
         const material = new THREE.LineBasicMaterial({ color: this.orbitColor });
         const geometry = new THREE.BufferGeometry().setFromPoints(points);
         return new THREE.Line(geometry, material);
@@ -99,7 +100,7 @@ export default class SpaceObject {
         this.orbitMesh.material.color.setColorName(orbitColor)
 
         // only show orbit when highlighted
-        this.orbitMesh.children[0].material.color.setColorName(orbitColor)
+        this.orbitMesh.material.color.setColorName(orbitColor)
         this.orbitMesh.visible = isHighlighted
     }
 }

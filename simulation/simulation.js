@@ -1,9 +1,9 @@
-// contains logic to go through scene objects and update their vertices 
-export default function updateSpaceObjects(spaceObjects, state) {
+// Contains logic to go through scene objects and update their vertices 
+export default function updateSpaceObjects(spaceObjects, bodyTypesVisibility, surveysVisibility) {
     spaceObjects.forEach((spaceObject) => {
 
-        // update visibility
-        const isVisible = state.visibleGroups.includes(spaceObject.group) && state.visibleTypes.includes(spaceObject.type)
+        // Update visibility
+        const isVisible = bodyTypesVisibility[spaceObject.type] && surveysVisibility[spaceObject.survey]
         spaceObject.setVisibility(isVisible)
     })
 }
