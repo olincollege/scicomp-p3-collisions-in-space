@@ -1,6 +1,5 @@
 import { degToRad } from "three/src/math/MathUtils"
 
-const scaleFactor = 1
 const defaultObjectSize = 5000000000
 
 const defaultColorMap = {
@@ -20,6 +19,7 @@ export default class SpaceObject {
         this.pos = orbit["pos"]
         this.semimajor = orbit["semi-major"]
         this.semiminor = orbit["semi-minor"]
+        this.c = orbit["c"]
         this.i = orbit["i"]
         this.node = orbit["node"]
         this.peri = orbit["peri"]
@@ -39,9 +39,19 @@ export default class SpaceObject {
         // size should be pulled from a database
         this.size = defaultObjectSize
 
+        // generate curve in local coords system
+        this.curve = this.generateCurve()
+
         // initialize object meshes
         this.objectMesh = this.createObjectMesh()
         this.orbitMesh = this.createOrbitMesh()
+
+        // nest in an object and apply transforms to that object
+        this.mesh = new THREE.Object3D()
+        this.mesh.add(this.objectMesh)
+        this.mesh.add(this.orbitMesh)
+        this.mesh.rotateZ(degToRad(this.node))
+        this.mesh.rotateX(degToRad(this.i))
     }
 
     createObjectMesh = () => {
@@ -54,34 +64,27 @@ export default class SpaceObject {
                 emissive: (this.type == 'star') ? 'yellow' : 'black',
             })
         )
-        mesh.position.set(this.pos.x * scaleFactor, this.pos.y * scaleFactor, this.pos.z * scaleFactor)
+        const pos = this.curve.getPointAt((this.v / 360))
+        mesh.position.set(pos.x, pos.y, 0)
 
         return mesh
     }
 
-    createOrbitMesh = () => {
-        console.log(this.semimajor, this.semimajor)
-        const curve = new THREE.EllipseCurve(
+    generateCurve = () => {
+        return new THREE.EllipseCurve(
             0, 0,
-            this.semimajor * scaleFactor, this.semiminor * scaleFactor,
+            this.semimajor, this.semiminor,
             0, 2 * Math.PI,
             false,
             degToRad(this.peri),
         );
-        const points = curve.getPoints(128);
+    }
 
+    createOrbitMesh = () => {
+        const points = this.curve.getPoints(128)
         const material = new THREE.LineBasicMaterial({ color: this.orbitColor });
         const geometry = new THREE.BufferGeometry().setFromPoints(points);
-
-        const line = new THREE.Line(geometry, material);
-
-        const orbitMesh = new THREE.Object3D()
-        orbitMesh.add(line)
-
-        orbitMesh.rotateZ(degToRad(this.node))
-        orbitMesh.rotateX(degToRad(this.i))
-        console.log(orbitMesh)
-        return orbitMesh
+        return new THREE.Line(geometry, material);
     }
 
     setVisibility = (isVisible) => {
@@ -93,7 +96,7 @@ export default class SpaceObject {
         const objectColor = isHighlighted ? objectHighlightColor : this.objectColor
         this.objectMesh.material.color.setColorName(objectColor)
         const orbitColor = isHighlighted ? orbitHighlightColor : this.orbitColor
-        this.orbitMesh.children[0].material.color.setColorName(orbitColor)
+        this.orbitMesh.material.color.setColorName(orbitColor)
 
         // only show orbit when highlighted
         // this.orbitMesh.children[0].material.color.setColorName(orbitColor)
