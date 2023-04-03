@@ -231,6 +231,65 @@ const sketch = async ({ context, fps }) => {
     })
   }
 
+  const buildInstancedMesh = () => {
+    const initMesh = (count) => {
+      let geometry = new THREE.SphereGeometry(1000000000, 3, 3)
+      let material = new THREE.MeshPhysicalMaterial({
+        color: 'grey',
+        roughness: 1,
+        flatShading: false,
+      })
+      let mesh = new THREE.InstancedMesh(geometry, material, count)
+
+      const dummy = new THREE.Object3D()
+      let i = 0
+      
+      console.log("Building mesh...")
+      oboe({
+        url: pathToOrbitJSON,
+        headers: { "Access-Control-Allow-Headers": "*" }
+      })
+        .node('!.*', function (data) {
+          if (data == null) {
+            return
+          }
+          const pos = data.pos
+          dummy.position.set(pos.x, pos.y, pos.z)
+          dummy.updateMatrix();
+          mesh.setMatrixAt(i++, dummy.matrix);
+          return oboe.drop()
+        })
+        .done(() => {
+          scene.add(mesh)
+          console.log('Mesh built!')
+        })
+        .fail(() => {
+          console.error('Failed to init mesh')
+        });
+    }
+
+    let count = 0
+    console.log("Counting objects...")
+    oboe({
+      url: pathToOrbitJSON,
+      headers: { "Access-Control-Allow-Headers": "*" }
+    })
+      .node('!.*', function (data) {
+        count += 1
+        if (count % 100000 == 0) {
+          console.log(count)
+        }
+        return oboe.drop()
+      })
+      .done(() => {
+        console.log('Counted space objects!')
+        initMesh(count)
+      })
+      .fail(() => {
+        console.error('Failed to count asteroids!')
+      });
+  }
+
   // Show or hide visibility based on body type and view settings
   const updateVisibility = () => {
     const isOrbitVisible = viewerSettings['Show orbits']
@@ -245,6 +304,8 @@ const sketch = async ({ context, fps }) => {
     })
   }
 
+  buildInstancedMesh()
+
   return {
     // Handle resize events here
     resize({ pixelRatio, viewportWidth, viewportHeight }) {
@@ -257,18 +318,18 @@ const sketch = async ({ context, fps }) => {
     render({ time, deltaTime }) {
 
       // Load current objects based on filter visibility
-      if (JSON.stringify(surveysVisibility) !== JSON.stringify(prevSurveysVisibility)) {
-        // need to do a more complex list of objects to unload and objects to load
-        loadObjectsBySurveys()
-        prevSurveysVisibility = JSON.parse(JSON.stringify(surveysVisibility))
-      }
+      // if (JSON.stringify(surveysVisibility) !== JSON.stringify(prevSurveysVisibility)) {
+      //   // need to do a more complex list of objects to unload and objects to load
+      //   loadObjectsBySurveys()
+      //   prevSurveysVisibility = JSON.parse(JSON.stringify(surveysVisibility))
+      // }
 
-      // Show/hide objects based on type selection and view settings
-      updateVisibility()
+      // // Show/hide objects based on type selection and view settings
+      // updateVisibility()
 
-      // Check if hovering over any objects, if so highlight in a color
-      const highlightedObjectIds = checkForHighlightedObjects()
-      highlightObjectsByID(highlightedObjectIds)
+      // // Check if hovering over any objects, if so highlight in a color
+      // const highlightedObjectIds = checkForHighlightedObjects()
+      // highlightObjectsByID(highlightedObjectIds)
 
       controls.update();
       composer.render();
