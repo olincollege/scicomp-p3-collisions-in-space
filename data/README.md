@@ -65,3 +65,26 @@ where each object has the keys:
   around the z-axis.)
 * `peri`: Argument of the periapsis of the orbit in degrees.
 * `v`: True anomaly of the asteroid in degrees.
+
+### MPC Survey Attribution Data
+
+All MPC observations can be downloaded
+[here](https://www.minorplanetcenter.net/iau/ECS/MPCAT-OBS/NumObs.txt.gz).
+Then, move the file to `raw`, unzip the file and run the following python
+script. Note that it may take a few minutes for data to be parsed.
+
+```
+mv ~/Downloads/NumObs.txt.gz raw/.  # Assumes Downloads directory
+gunzip raw/NumObs.txt.gz
+python script/parse_numobs.py
+```
+
+The resulting json object is created as `/processed/survey_attribution.json` and
+is an array where each object has the keys:
+
+* `number`: Packed 5 digit numerical designation of the asteroid.
+* `surveyId`: 3 letter survey ID.
+* `time`: dict containing:
+  * `year`: Year of entry.
+  * `month`: Month of entry.
+  * `Day`: Day of entry.

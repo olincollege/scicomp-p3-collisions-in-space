@@ -66,7 +66,7 @@ def parse_line(line):
 
 
 def parse_file():
-    global SKIPPED, PARSED
+    global PARSED
     print(f"Parsing '{READ_PATH}'...")
     with open(READ_PATH, "r") as rf:
         for i, line in enumerate(tqdm(rf)):
