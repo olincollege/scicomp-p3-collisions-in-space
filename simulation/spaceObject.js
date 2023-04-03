@@ -99,7 +99,7 @@ export default class SpaceObject {
         this.orbitMesh.material.color.setColorName(orbitColor)
 
         // only show orbit when highlighted
-        // this.orbitMesh.children[0].material.color.setColorName(orbitColor)
-        // this.orbitMesh.visible = isHighlighted
+        this.orbitMesh.children[0].material.color.setColorName(orbitColor)
+        this.orbitMesh.visible = isHighlighted
     }
 }
