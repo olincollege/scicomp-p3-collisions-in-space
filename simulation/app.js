@@ -24,6 +24,14 @@ const pathToOrbitJSON = './data/processed/asteroids some.json'
 // Initialize Gui
 var gui = new dat.gui.GUI();
 
+// Show visualizaton options
+const viewerSettings = {
+  "Show orbits": true
+}
+const viewerSettingsFolder = gui.addFolder('Viewer');
+viewerSettingsFolder.add(viewerSettings, "Show orbits")
+viewerSettingsFolder.open()
+
 // Track visibility of bodies by type
 const bodyTypesVisibility = { "Stars": true, "Planets": true, "Asteroids": true }
 const bodyTypesFolder = gui.addFolder('Body Types');
@@ -202,7 +210,6 @@ const sketch = async ({ context, fps }) => {
               spaceObjects[data.survey].push(spaceObject)
             }
             scene.add(spaceObject.mesh)
-            spaceObjects.push(spaceObject)
           }
         }
       })
@@ -222,21 +229,18 @@ const sketch = async ({ context, fps }) => {
         delete spaceObjects[survey]
       }
     })
-
-    // Update visibility by body type
-    Object.values(spaceObjects).forEach(spaceObjectsArray => {
-      spaceObjectsArray.forEach((spaceObject) => {
-        const isVisible = bodyTypesVisibility[spaceObject.type]
-        spaceObject.setVisibility(isVisible)
-      })
-    })
   }
 
-  const showObjectsByType = () => {
+  // Show or hide visibility based on body type and view settings
+  const updateVisibility = () => {
+    const isOrbitVisible = viewerSettings['Show orbits']
+
     Object.values(spaceObjects).forEach(spaceObjectsArray => {
       spaceObjectsArray.forEach((spaceObject) => {
-        const isVisible = bodyTypesVisibility[spaceObject.type]
-        spaceObject.setVisibility(isVisible)
+        const isSpaceObjectVisible = bodyTypesVisibility[spaceObject.type]
+
+        spaceObject.setVisibility(isSpaceObjectVisible)
+        spaceObject.setOrbitVisibility(isOrbitVisible && isSpaceObjectVisible)
       })
     })
   }
@@ -259,8 +263,8 @@ const sketch = async ({ context, fps }) => {
         prevSurveysVisibility = JSON.parse(JSON.stringify(surveysVisibility))
       }
 
-      // Show/hide objects based on type selection
-      showObjectsByType()
+      // Show/hide objects based on type selection and view settings
+      updateVisibility()
 
       // Check if hovering over any objects, if so highlight in a color
       const highlightedObjectIds = checkForHighlightedObjects()
