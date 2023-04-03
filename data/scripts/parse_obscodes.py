@@ -1,7 +1,7 @@
 """Parse MPC orbit data file and write to JSON file."""
 import json
 
-from json_stream import streamable_list
+from json_stream import streamable_dict
 from tqdm import tqdm
 
 
@@ -13,10 +13,7 @@ PARSED = 0
 def parse_line(line):
     id_ = line[:3]
     name = line[30:].strip()
-    return {
-        "surveyId": id_,
-        "name": name
-    }
+    return id_, name
 
 
 def parse_file():
@@ -26,16 +23,16 @@ def parse_file():
         for i, obj in enumerate(tqdm(rf)):
             if i < 2:
                 continue
-            observation = parse_line(obj)
+            id_, name = parse_line(obj)
             PARSED += 1
-            yield observation
+            yield id_, name
 
 
 def main():
     print(f"Streaming data to '{WRITE_PATH}'...")
     with open(WRITE_PATH, "w") as wf:
         generator = parse_file()
-        json.dump(streamable_list(generator), wf)
+        json.dump(streamable_dict(generator), wf)
     print("Parsing complete.")
     print(f"Parsed {PARSED} entries.")
 
