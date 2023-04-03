@@ -17,7 +17,34 @@ require("three/examples/js/postprocessing/ShaderPass");
 require("three/examples/js/postprocessing/BloomPass");
 require("three/examples/js/postprocessing/UnrealBloomPass");
 
-const pathToOrbitJSON = './data/processed/orbits all.json'
+import * as dat from 'dat.gui';
+
+const pathToSurveyJSON = './data/processed/survey_codes.json'
+const pathToOrbitJSON = './data/processed/asteroids partial.json'
+
+let surveysVisibility = {}
+
+var gui = new dat.gui.GUI();
+
+const surveysFolder = gui.addFolder('Surveys');
+
+// Fetch survey lists and show in gui
+oboe({
+  url: pathToSurveyJSON,
+  headers: { "Access-Control-Allow-Headers": "*" }
+})
+  .node('!*.', function (surveyName) {
+    surveysVisibility[surveyName] = false
+    surveysFolder.add(surveysVisibility, surveyName).onChange(function (value) {
+    });
+  })
+  .done(() => {
+    console.log('Loaded survey list!')
+    console.log(surveysVisibility)
+  })
+  .fail(() => {
+    console.error('Failed to load survey list!')
+  });
 
 const cameraMinRenderDepth = 1e10
 const cameraMaxRenderDepth = 1e14
