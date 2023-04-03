@@ -3,16 +3,12 @@ import math
 import json
 
 import orbital
-import json_stream
 from json_stream import streamable_list
 from tqdm import tqdm
 
 
-READ_PATH = "raw/mpcorb_extended.json"
+READ_PATH = "raw/MPCORB.DAT"
 WRITE_PATH = "processed/orbits.json"
-REQUIRED_FIELDS = ("a", "e", "i", "Node", "Peri", "M")
-
-SKIPPED = 0
 PARSED = 0
 
 
@@ -20,40 +16,40 @@ def au_to_m(au):
     return au * 149597870691
 
 
-def valid_object(obj):
-    for field in REQUIRED_FIELDS:
-        if field not in obj:
-            return False
-    if obj["e"] >= 1:
-        return False
-    return True
-
-
-def parse_object(i, obj):
-    if "Number" in obj:
-        id_ = int(obj["Number"][1:-1])  # Remove '(' and ')'
+def parse_line(line):
+    name = line[163:194].strip()
+    id_ = line[0:7].strip()
+    if len(id_) == 5:
+        number = id_
+        provisional = None
     else:
-        # Ad-hoc fix for ~half the entries that are missing the Number field
-        # Howerver, does hold true for the 600,000 entries that have the Number field
-        id_ = i + 1
+        number = None
+        provisional = id_
+
+    a = float(line[92:103].strip())
+    e = float(line[70:79].strip())
+    i = float(line[59:68].strip())
+    node = float(line[48:57].strip())
+    peri = float(line[37:46].strip())
+    m = float(line[26:35].strip())
 
     elements = orbital.elements.KeplerianElements(
-        a=au_to_m(obj["a"]),
-        e=obj["e"],
-        i=math.radians(obj["i"]),
-        raan=math.radians(obj["Node"]),
-        arg_pe=math.radians(obj["Peri"]),
-        M0=math.radians(obj["M"]),
+        a=au_to_m(a),
+        e=e,
+        i=math.radians(i),
+        raan=math.radians(node),
+        arg_pe=math.radians(peri),
+        M0=math.radians(m),
     )
 
     # Ellipse params
-    e, a = obj["e"], obj["a"]
     c = e * a  # e = c / a
     b = math.sqrt((a ** 2) - (c ** 2))  # c ** 2 + b ** 2 = a ** 2
 
     return {
-        "name": obj.get("Name", "Un-Named"),
-        "id": id_,
+        "name": name if len(name) else "Un-Named",
+        "number": number,
+        "provisional": provisional,
         "pos": {
             "x": elements.r.x,
             "y": elements.r.y,
@@ -62,23 +58,21 @@ def parse_object(i, obj):
         "semi-major": au_to_m(a),
         "semi-minor": au_to_m(b),
         "c": au_to_m(c),
-        "i": obj["i"],
-        "node": obj["Node"],
-        "peri": obj["Peri"],
+        "i": i,
+        "node": node,
+        "peri": peri,
         "v": math.degrees(elements.f),
     }
 
 
 def parse_file():
-    global SKIPPED, PARSED
+    global PARSED
     print(f"Parsing '{READ_PATH}'...")
     with open(READ_PATH, "r") as rf:
-        data = json_stream.load(rf)
-        for i, obj in enumerate(tqdm(data.persistent())):
-            if not valid_object(obj):
-                SKIPPED += 1
+        for i, line in enumerate(tqdm(rf)):
+            if i < 43 or len(line) == 1:
                 continue
-            space_object = parse_object(i, obj)
+            space_object = parse_line(line)
             PARSED += 1
             yield space_object
 
@@ -89,7 +83,6 @@ def main():
         generator = parse_file()
         json.dump(streamable_list(generator), wf)
     print("Parsing complete.")
-    print(f"Skipped {SKIPPED} entries.")
     print(f"Parsed  {PARSED} entries.")
 
 if __name__ == "__main__":
