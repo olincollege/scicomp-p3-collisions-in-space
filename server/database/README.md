@@ -15,7 +15,7 @@ Table containing metadata associated with every asteroid. Keyed by where the
 asteroid appears in the asteroids.json file. Ex: Ceres is the first element in
 the json file, and so has the ID `1`. To setup:
 
-```
+```console
 python database/scripts/build_asteroids_database.py
 ```
 
@@ -50,7 +50,7 @@ The table contains:
 Table containing a mapping of survey IDs to asteroid IDs. Asteroid IDs are as
 they appear in the asteroids table. To setup:
 
-```
+```console
 python database/scripts/build_surveys_database.py
 ```
 
@@ -70,9 +70,9 @@ The data for each asteroid's orbit and survey.
 The combination of the below datasets into the final dataset used in the
 visualization. Fist, follow instructions for all below datasets. Then, run the
 following python script. Note that it may take a few minutes for data to be
-parsed. 
+parsed.
 
-```
+```console
 python database/scripts/combine_datasets.py
 ```
 
@@ -114,7 +114,7 @@ The MPC orbital data can be downloaded from
 Then, move the file to `raw`, unzip the file and run the following python
 script. Note that it may take a few minutes for data to be parsed.
 
-```
+```console
 mv ~/Downloads/MPCORB.DAT.gz database/raw/.  # Assumes Downloads directory
 gunzip database/raw/MPCORB.DAT.gz
 python database/scripts/parse_mpcord.py
@@ -150,7 +150,7 @@ The MPC observations can be downloaded
 Then, move the file to `raw`, unzip the file and run the following python
 script. Note that it may take a few minutes for data to be parsed.
 
-```
+```console
 mv ~/Downloads/NumObs.txt.gz database/raw/.  # Assumes Downloads directory
 gunzip database/raw/NumObs.txt.gz
 python database/scripts/parse_numobs.py
@@ -167,7 +167,6 @@ has the keys:
   * `month`: Month of entry.
   * `Day`: Day of entry.
 
-
 ### MPC Survey Code Data
 
 A mapping of survey IDs to survey names.
@@ -177,7 +176,7 @@ The survey codes can be downloaded
 the page as a local file.) Then, move the file to `raw` and run the following
 python script.
 
-```
+```console
 mv ~/Downloads/ObsCodes.html database/raw/.  # Assumes Downloads directory
 python database/scripts/parse_obscodes.py
 ```
