@@ -5,7 +5,7 @@ See `server` README for quick setup instructions
 
 ## Database
 
-Descriptions of the database and how to set it up.
+Descriptions of the database tables and how to set them up.
 
 Below datasets must all be parsed before the database can be made.
 
@@ -61,11 +61,7 @@ The table contains:
 
 ## Datasets
 
-Before running scripts, ensure the venv is activated with
-
-```
-source venv/bin/activate
-```
+Descriptions of the datasets and how to set them up.
 
 ### Total Dataset
 
