@@ -38,7 +38,7 @@ const getMetadata = (nodeCallback, doneCallback) => {
 
 const getSurveys = (nodeCallback, doneCallback) => {
   oboe({url: surveysEndpoint})
-    .node('!surveys.*', function (data) {
+    .node('!.', function (data) {
       nodeCallback(data)
     })
     .done(() => {
@@ -50,4 +50,18 @@ const getSurveys = (nodeCallback, doneCallback) => {
     });
 }
 
-export { streamAsteroids, getMetadata, getSurveys }
+const getSurvey = (surveyId, nodeCallback, doneCallback) => {
+  oboe({url: surveysEndpoint + "/" + surveyId})
+    .node('!.', function (data) {
+      nodeCallback(data)
+    })
+    .done(() => {
+      console.log('Loaded survey ' + surveyId)
+      doneCallback()
+    })
+    .fail(() => {
+      console.error('Failed to load survey ' + surveyId)
+    });
+}
+
+export { streamAsteroids, getMetadata, getSurveys, getSurvey }

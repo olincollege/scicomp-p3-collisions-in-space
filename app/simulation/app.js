@@ -8,7 +8,6 @@ import { initializeRaycaster } from './raycasting'
 import { initializeInstancedMesh } from './mesh'
 
 import * as THREE from 'three';
-import { degToRad } from "three/src/math/MathUtils"
 
 global.THREE = THREE;
 require("three/examples/js/controls/OrbitControls");
@@ -94,7 +93,7 @@ const sketch = async ({ context, fps }) => {
   composer.setSize(window.innerWidth, window.innerHeight);
 
   const { raycaster, mouse } = initializeRaycaster()
-  let { objectMesh, orbitMesh } = initializeInstancedMesh()
+  let { objectMesh, orbitMesh } = initializeInstancedMesh(scene)
 
   // Show or hide visibility based on body type and view settings
   const updateVisibility = () => {

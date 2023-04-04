@@ -37,12 +37,14 @@ const buildSurveysGui = (gui) => {
 
   let allInProgress = false
   const callback = () => {
+    // Callback for normal survey gui elements
     if (!allInProgress) {
       updateInstancedMesh(surveysVisibility)
     }
   }
 
   const allCallback = () => {
+    // Callback for 'All' gui element
     let state = surveysVisibility['All']
     allInProgress = true
     controllers.forEach((controller) => {
@@ -54,8 +56,10 @@ const buildSurveysGui = (gui) => {
     callback()
   }
 
-  const nodeCallback = (surveyName) => {
-    surveysVisibility[surveyName] = true
+  const nodeCallback = (data) => {
+    Object.values(data.surveys).forEach((surveyName) => {
+      surveysVisibility[surveyName] = true
+    })
   }
   const doneCallback = () => {
     // Add to menu
