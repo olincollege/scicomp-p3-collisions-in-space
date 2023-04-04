@@ -2,6 +2,7 @@ import * as dat from 'dat.gui';
 const oboe = require("oboe")
 
 import { getSurveys } from './api';
+import { updateInstancedMesh } from './mesh'
 
 
 const buildViewerGui = (gui) => {
@@ -30,24 +31,42 @@ const buildBodiesGui = (gui) => {
 
 const buildSurveysGui = (gui) => {
   // Track visibility of bodies by survey
-  let surveysVisibility = {}
+  let surveysVisibility = {"All": true}
+  let controllers = []
   const surveysFolder = gui.addFolder('Surveys');
 
+  let allInProgress = false
+  const callback = () => {
+    if (!allInProgress) {
+      updateInstancedMesh(surveysVisibility)
+    }
+  }
+
+  const allCallback = () => {
+    let state = surveysVisibility['All']
+    allInProgress = true
+    controllers.forEach((controller) => {
+      if (controller.property != 'All') {
+        controller.setValue(state)
+      }
+    })
+    allInProgress = false
+    callback()
+  }
+
   const nodeCallback = (surveyName) => {
-    surveysVisibility[surveyName] = false
+    surveysVisibility[surveyName] = true
   }
   const doneCallback = () => {
-    surveysVisibility = Object.keys(surveysVisibility)
-      .sort().reduce(
-        (obj, key) => {
-          obj[key] = surveysVisibility[key];
-          return obj;
-        },
-        {}
-      )
     // Add to menu
-    Object.entries(surveysVisibility).forEach(([surveyName, state]) => {
-      surveysFolder.add(surveysVisibility, surveyName)
+    controllers = Object.keys(surveysVisibility).map((surveyName) => {
+      let controller = surveysFolder.add(surveysVisibility, surveyName)
+      if (surveyName == 'All') {
+        controller.onChange(allCallback)
+      } else {
+        controller.onChange(callback)
+      }
+      return controller
     });
     surveysFolder.open()
   }

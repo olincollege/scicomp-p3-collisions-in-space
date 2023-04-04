@@ -63,4 +63,15 @@ const initializeInstancedMesh = () => {
   return { objectMesh, orbitMesh }
 }
 
-export { initializeInstancedMesh }
+const updateInstancedMesh = (surveyVisibility) => {
+  const surveys = Object.entries(surveyVisibility)
+    .filter(([survey, isVisible]) => {
+      return isVisible
+    })
+    .map(([survey, isVisible]) => {
+      return survey
+    })
+  console.log(surveys)
+}
+
+export { initializeInstancedMesh, updateInstancedMesh }

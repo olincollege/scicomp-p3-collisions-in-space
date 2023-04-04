@@ -22,7 +22,6 @@ require("three/examples/js/postprocessing/BloomPass");
 require("three/examples/js/postprocessing/UnrealBloomPass");
 
 let guiSettings = initializeGui()
-let prevSurveysVisibility = {}
 
 // set camera render limits
 const cameraMinRenderDepth = 1e10
@@ -102,7 +101,7 @@ const sketch = async ({ context, fps }) => {
     const isOrbitVisible = guiSettings.viewer['Show Orbits']
     try {
       orbitMesh.visible = isOrbitVisible
-    } catch { }
+    } catch {}
   }
 
   return {
@@ -115,14 +114,6 @@ const sketch = async ({ context, fps }) => {
     },
     // And render events here
     render({ time, deltaTime }) {
-
-      // Load current objects based on filter visibility
-      // if (JSON.stringify(surveysVisibility) !== JSON.stringify(prevSurveysVisibility)) {
-      //   // need to do a more complex list of objects to unload and objects to load
-      //   loadObjectsBySurveys()
-      //   prevSurveysVisibility = JSON.parse(JSON.stringify(surveysVisibility))
-      // }
-
       // Show/hide objects based on type selection and view settings
       updateVisibility()
 
