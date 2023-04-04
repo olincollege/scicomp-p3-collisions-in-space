@@ -3,6 +3,8 @@ import canvasSketch from 'canvas-sketch';
 const oboe = require("oboe")
 
 import SpaceObject from './spaceObject';
+import buildGui from './gui';
+import { streamAsteroids, getMetadata } from './api';
 
 import * as THREE from 'three';
 import { degToRad } from "three/src/math/MathUtils"
@@ -18,66 +20,13 @@ require("three/examples/js/postprocessing/ShaderPass");
 require("three/examples/js/postprocessing/BloomPass");
 require("three/examples/js/postprocessing/UnrealBloomPass");
 
-import * as dat from 'dat.gui';
-
 const apiURL = 'http://127.0.0.1:5000/api'
 const metadataEndpoint = apiURL + '/meta'
 const asteroidsEndpoint = apiURL + '/asteroids'
 const surveysEndpoint = apiURL + '/surveys'
 
-// Initialize Gui
-var gui = new dat.gui.GUI();
-
-// Show visualizaton options
-const viewerSettings = {
-  "Show orbits": true,
-  "Bloom": true
-}
-const viewerSettingsFolder = gui.addFolder('Viewer');
-viewerSettingsFolder.add(viewerSettings, "Show orbits")
-viewerSettingsFolder.add(viewerSettings, "Bloom")
-viewerSettingsFolder.open()
-
-// Track visibility of bodies by type
-const bodyTypesVisibility = { "Stars": true, "Planets": true, "Asteroids": true }
-const bodyTypesFolder = gui.addFolder('Body Types');
-
-Object.entries(bodyTypesVisibility).forEach(([bodyType, state]) => {
-  bodyTypesFolder.add(bodyTypesVisibility, bodyType)
-});
-bodyTypesFolder.open()
-
-// Track visibility of bodies by survey
-let surveysVisibility = {}
+let guiSettings = buildGui()
 let prevSurveysVisibility = {}
-const surveysFolder = gui.addFolder('Surveys');
-
-// Fetch survey lists and show in gui
-oboe({url: surveysEndpoint})
-  .node('!surveys.*', function (surveyName) {
-    surveysVisibility[surveyName] = false
-  })
-  .done(() => {
-    // Sort survey list
-    surveysVisibility = Object.keys(surveysVisibility)
-      .sort().reduce(
-        (obj, key) => {
-          obj[key] = surveysVisibility[key];
-          return obj;
-        },
-        {}
-      );
-
-    // Add to menu
-    Object.entries(surveysVisibility).forEach(([surveyName, state]) => {
-      surveysFolder.add(surveysVisibility, surveyName)
-    });
-    surveysFolder.open()
-    console.log('Loaded survey list!')
-  })
-  .fail(() => {
-    console.error('Failed to load survey list!')
-  });
 
 // set camera render limits
 const cameraMinRenderDepth = 1e10
@@ -189,55 +138,7 @@ const sketch = async ({ context, fps }) => {
     })
   }
 
-  const loadObjectsBySurveys = () => {
-    // Update list of visible surveys
-    let visibleSurveys = []
-    Object.entries(surveysVisibility).filter(([survey, isVisible]) => {
-      if (isVisible) {
-        visibleSurveys.push(survey)
-      }
-    });
-
-    // Load objects
-    oboe({
-      url: pathToOrbitJSON,
-      headers: { "Access-Control-Allow-Headers": "*" }
-    })
-      .node('!.*', function (data) {
-        if (data != null) {
-          if (visibleSurveys.includes(data.survey)) {
-            const spaceObject = new SpaceObject(
-              data, "Asteroids", 'grey'
-            )
-            if (typeof (spaceObjects[data.survey]) == "undefined") {
-              spaceObjects[data.survey] = [spaceObject]
-            } else {
-              spaceObjects[data.survey].push(spaceObject)
-            }
-            scene.add(spaceObject.mesh)
-          }
-        }
-      })
-      .done(() => {
-        console.log('Loaded requested space objects!')
-      })
-      .fail(() => {
-        console.error('Failed to load space objects!')
-      });
-
-    // Unload objects
-    Object.keys(spaceObjects).forEach(survey => {
-      if (!visibleSurveys.includes(survey)) {
-        spaceObjects[survey].forEach(spaceObject => {
-          scene.remove(spaceObject.mesh)
-        })
-        delete spaceObjects[survey]
-      }
-    })
-  }
-
   let objectMesh, orbitMesh
-
   const buildInstancedMesh = () => {
     const initMesh = (count) => {
       let objectGeometry = new THREE.SphereGeometry(1000000000, 3, 3)
@@ -258,66 +159,48 @@ const sketch = async ({ context, fps }) => {
       const dummyObject = new THREE.Object3D()
       const dummyOrbit = new THREE.Object3D()
       let i = 0
+    
+      const nodeCallback = (data) => {
+        const pos = data.pos
+        dummyObject.position.set(pos.x, pos.y, pos.z)
+        dummyObject.updateMatrix();
+        objectMesh.setMatrixAt(i++, dummyObject.matrix);
 
+        dummyOrbit.rotateY(data.peri) // not sure where this is supposed to go
+        dummyOrbit.rotateZ(degToRad(data.node))
+        dummyOrbit.rotateX(degToRad(data.i))
+        dummyOrbit.scale.set(
+          data["semi-major"] / 2,
+          data["semi-minor"] / 2,
+          data["semi-major"]
+        )
+        dummyOrbit.updateMatrix();
+        orbitMesh.setMatrixAt(i++, dummyOrbit.matrix);
+      }
+      const doneCallback = () => {
+        scene.add(objectMesh)
+        scene.add(orbitMesh)
+      }
       console.log("Building mesh...")
-      oboe({url: asteroidsEndpoint})
-        .node('!asteroids.*', function (data) {
-          if (data == null) {
-            return
-          }
-          const pos = data.pos
-          dummyObject.position.set(pos.x, pos.y, pos.z)
-          dummyObject.updateMatrix();
-          objectMesh.setMatrixAt(i++, dummyObject.matrix);
-
-          dummyOrbit.rotateY(data.peri) // not sure where this is supposed to go
-          dummyOrbit.rotateZ(degToRad(data.node))
-          dummyOrbit.rotateX(degToRad(data.i))
-          dummyOrbit.scale.set(data["semi-major"] / 2, data["semi-minor"] / 2, data["semi-major"])
-          dummyOrbit.updateMatrix();
-          orbitMesh.setMatrixAt(i++, dummyOrbit.matrix);
-
-          return oboe.drop()
-        })
-        .done(() => {
-          scene.add(objectMesh)
-          scene.add(orbitMesh)
-          console.log('Mesh built!')
-        })
-        .fail(() => {
-          console.error('Failed to init mesh')
-        });
+      streamAsteroids(nodeCallback, doneCallback)
     }
-
+    
     let count = 0
-    oboe({url: metadataEndpoint})
-      .node('!asteroids', function (data) {
-        count = data.n
-      })
-      .done(() => {
-        console.log('Counted space objects!')
-        initMesh(count)
-      })
-      .fail((thrown) => {
-        console.error('Failed to count asteroids!')
-        console.error(thrown)
-      });
+    const nodeCallback = (data) => {
+        count = data.asteroids.n
+    }
+    const doneCallback = () => {
+      initMesh(count)
+    }
+    getMetadata(nodeCallback, doneCallback)
   }
 
   // Show or hide visibility based on body type and view settings
   const updateVisibility = () => {
-    const isOrbitVisible = viewerSettings['Show orbits']
+    const isOrbitVisible = guiSettings.viewer['Show Orbits']
     try {
       orbitMesh.visible = isOrbitVisible
     } catch { }
-    // Object.values(spaceObjects).forEach(spaceObjectsArray => {
-    //   spaceObjectsArray.forEach((spaceObject) => {
-    //     const isSpaceObjectVisible = bodyTypesVisibility[spaceObject.type]
-
-    //     spaceObject.setVisibility(isSpaceObjectVisible)
-    //     spaceObject.setOrbitVisibility(isOrbitVisible && isSpaceObjectVisible)
-    //   })
-    // })
   }
 
   buildInstancedMesh()
@@ -347,7 +230,7 @@ const sketch = async ({ context, fps }) => {
       // const highlightedObjectIds = checkForHighlightedObjects()
       // highlightObjectsByID(highlightedObjectIds)
 
-      bloomPass.enabled = viewerSettings.Bloom
+      bloomPass.enabled = guiSettings.viewer.Bloom
       controls.update();
       composer.render();
     },
