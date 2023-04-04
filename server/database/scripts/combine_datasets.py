@@ -119,7 +119,9 @@ def combine_datasets():
                 if h_orbit["number"] in cache:
                     yield hit_cache(h_orbit, cache, id_to_name)
                 else:
-                    yield unlinked_orbit(h_orbit)
+                    # yield unlinked_orbit(h_orbit)
+                    # Don't save orbits that don't have a survey
+                    pass
             h_orbit = []
             hanging_orbits = _replacement
         else:

@@ -1,5 +1,6 @@
 import os
 import sqlite3
+from typing import Any
 
 from flask import g
 
@@ -20,10 +21,13 @@ def get_db():
     return db
 
 
-def execute_query(query, args=()):
+def execute_query(query, args=(), one=True) -> Any:
     conn = get_db()
     c = conn.execute(query, args)
-    rv = c.fetchone()
+    if one:
+        rv = c.fetchone()
+    else:
+        rv = c.fetchall()
     c.close()
     return rv
 

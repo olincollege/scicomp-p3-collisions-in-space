@@ -12,6 +12,30 @@ def get_asteroids_metadata():
     }
 
 
+def get_asteroids():
+    cols = ["x", "y", "z", "semiminor", "semimajor", "c", "i", "node", "peri", "v"]
+    asteroids = execute_query(
+        f"SELECT {', '.join(cols)} FROM asteroids",
+        one=False,
+    )
+    return [
+        {
+            "pos": {
+                "x": a["x"],
+                "y": a["y"],
+                "z": a["z"],
+            },
+            "semi-major": a["semimajor"],
+            "semi-minor": a["semiminor"],
+            "c": a["c"],
+            "i": a["i"],
+            "node": a["node"],
+            "peri": a["peri"],
+            "v": a["v"],
+        }
+        for a in asteroids
+    ]
+
 
 def get_asteroid(asteroid_id):
     metadata = execute_query(
@@ -46,9 +70,20 @@ def get_asteroid(asteroid_id):
     }
 
 
+def get_surveys():
+    surveys = execute_query(
+        "SELECT surveyId, surveyName FROM surveys",
+        one=False,
+    )
+    return {
+        s["surveyId"]: s["surveyName"]
+        for s in surveys
+    }
+
+
 def get_survey(survey_id):
     asteroids = execute_query(
-        "SELECT * FROM surveys WHERE surveyId = ?",
+        "SELECT asteroids FROM surveys WHERE surveyId = ?",
         (survey_id,),
     )
     if asteroids is None:
@@ -58,7 +93,3 @@ def get_survey(survey_id):
     return {
         "asteroids": asteroids
     }
-
-
-def get_surveys():
-    pass

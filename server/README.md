@@ -70,7 +70,7 @@ See the `database` README.md for details on table formats.
 To start the server, activate the virtual environment and simply run:
 
 ```console
-flask --app server run
+flask --app app run
 ```
 
 The server will be started on `localhost:5000`
@@ -79,23 +79,34 @@ The server will be started on `localhost:5000`
 
 Endpoints for the api are:
 
-* `/api/asteroids`: Asteroid table level metadata. Returns:
-  * `n`: Number of asteroids in database.
+* `/api/meta`: Metadata. Returns:
+  * `asteroids`: Dict containing:
+    * `n`: The number of asteroids.
+* `/api/asteroids`: All asteroids. Returns:
+  * `asteroids`: List where each element is a dict containing:
+    * `pos`: Dict containing:
+      * `x`: X coordinate of the asteroid in m.
+      * `y`: Y coordinate of the asteroid in m.
+      * `z`: Z coordinate of the asteroid in m.
+    * `semi-major`: Size of the semi-major axis of the orbit in m.
+    * `semi-minor`: Size of the semi-minor axis of the orbit in m.
+    * `c`: Distance from the center of the orbit to the foci in m.
+    * `i`: Inclination of the orbit in degrees. (Rotation from the xy-plane.)
+    * `node`: Longitude of the ascending node of the orbit in degrees. (Rotation
+      around the z-axis.)
+    * `peri`: Argument of the periapsis of the orbit in degrees.
+    * `v`: True anomaly of the asteroid in degrees.
 * `/api/asteroids/<asteroid_id>`: Asteroid specific metadata. Returns:
   * `name`: The name of the asteroid, "Un-Named" if not set in the MPC data.
-  * `number`: Packed 5 digit numerical designation of the asteroid. Null if the asteroid
-    only has a provisional designation.
-  * `provisional`: Packed 7 digit provisional designation of the asteroid. Null if
-    the asteroid has been assigned a number.
-  * `survey`: The name of the survey that discovered the asteroid. Null if the
-    asteroid is not linked to a survey.
-  * `surveyId`: The ID of the survey that discovered the asteroid. Null if the
-    asteroid is not linked to a survey.
-  * `time`: dict containing:
-    * `year`: Year of discovery. Null if the asteroid is not linked to a survey.
-    * `month`: Month of discovery. Null if the asteroid is not linked to a survey.
-    * `Day`: Day of discovery. Null if the asteroid is not linked to a survey.
-  * `pos`: dict containing:
+  * `number`: Packed 5 digit numerical designation of the asteroid.
+  * `provisional`: Packed 7 digit provisional designation of the asteroid.
+  * `survey`: The name of the survey that discovered the asteroid.
+  * `surveyId`: The ID of the survey that discovered the asteroid.
+  * `time`: Dict containing:
+    * `year`: Year of discovery.
+    * `month`: Month of discovery.
+    * `Day`: Day of discovery.
+  * `pos`: Dict containing:
     * `x`: X coordinate of the asteroid in m.
     * `y`: Y coordinate of the asteroid in m.
     * `z`: Z coordinate of the asteroid in m.
@@ -107,6 +118,9 @@ Endpoints for the api are:
     around the z-axis.)
   * `peri`: Argument of the periapsis of the orbit in degrees.
   * `v`: True anomaly of the asteroid in degrees.
+* `/api/surveys`: All surveys. Returns:
+  * `surveys`: Dict containing:
+    * `{survey_id}`: `{Associated survey name}`
 * `/api/surveys/<survey_id>`: Survey asteroids (NOTE: Takes survey ID, *not*
   survey name, as parameter. Survey ID is a three letter string.) Returns:
   * `asteroids`: List of asteroid ids that are linked to the survey.

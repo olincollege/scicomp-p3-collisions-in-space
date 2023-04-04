@@ -22,17 +22,13 @@ python database/scripts/build_asteroids_database.py
 The table contains:
 
 * `name`: The name of the asteroid, "Un-Named" if not set in the MPC data.
-* `number`: Packed 5 digit numerical designation of the asteroid. Null if the asteroid
-  only has a provisional designation.
-* `provisional`: Packed 7 digit provisional designation of the asteroid. Null if
-  the asteroid has been assigned a number.
-* `survey`: The name of the survey that discovered the asteroid. Null if the
-  asteroid is not linked to a survey.
-* `surveyId`: The ID of the survey that discovered the asteroid. Null if the
-  asteroid is not linked to a survey.
-* `year`: Year of discovery. Null if the asteroid is not linked to a survey.
-* `month`: Month of discovery. Null if the asteroid is not linked to a survey.
-* `Day`: Day of discovery. Null if the asteroid is not linked to a survey.
+* `number`: Packed 5 digit numerical designation of the asteroid.
+* `provisional`: Packed 7 digit provisional designation of the asteroid.
+* `survey`: The name of the survey that discovered the asteroid.
+* `surveyId`: The ID of the survey that discovered the asteroid.
+* `year`: Year of discovery.
+* `month`: Month of discovery.
+* `Day`: Day of discovery.
 * `x`: X coordinate of the asteroid in m.
 * `y`: Y coordinate of the asteroid in m.
 * `z`: Z coordinate of the asteroid in m.
@@ -56,7 +52,8 @@ python database/scripts/build_surveys_database.py
 
 The table contains:
 
-* `surveyId`: The ID of the survey that discovered the asteroid.
+* `surveyId`: The ID of the survey.
+* `surveyName`: The name of the survey.
 * `asteroids`: Comma delimited list of asteroid IDs.
 
 ## Datasets
@@ -68,9 +65,9 @@ Descriptions of the datasets and how to set them up.
 The data for each asteroid's orbit and survey.
 
 The combination of the below datasets into the final dataset used in the
-visualization. Fist, follow instructions for all below datasets. Then, run the
-following python script. Note that it may take a few minutes for data to be
-parsed.
+visualization. DOES NOT include asteroids that do not have an associated survey
+Fist, follow instructions for all below datasets. Then, run the following python
+script. Note that it may take a few minutes for data to be parsed.
 
 ```console
 python database/scripts/combine_datasets.py
@@ -80,18 +77,14 @@ The resulting json object is created as `database/processed/asteroids.json` and
 is an array where each object has the keys:
 
 * `name`: The name of the asteroid, "Un-Named" if not set in the MPC data.
-* `number`: Packed 5 digit numerical designation of the asteroid. Null if the asteroid
-  only has a provisional designation.
-* `provisional`: Packed 7 digit provisional designation of the asteroid. Null if
-  the asteroid has been assigned a number.
-* `survey`: The name of the survey that discovered the asteroid. Null if the
-  asteroid is not linked to a survey.
-* `surveyId`: The ID of the survey that discovered the asteroid. Null if the
-  asteroid is not linked to a survey.
+* `number`: Packed 5 digit numerical designation of the asteroid.
+* `provisional`: Packed 7 digit provisional designation of the asteroid.
+* `survey`: The name of the survey that discovered the asteroid.
+* `surveyId`: The ID of the survey that discovered the asteroid.
 * `time`: dict containing:
-  * `year`: Year of discovery. Null if the asteroid is not linked to a survey.
-  * `month`: Month of discovery. Null if the asteroid is not linked to a survey.
-  * `Day`: Day of discovery. Null if the asteroid is not linked to a survey.
+  * `year`: Year of discovery.
+  * `month`: Month of discovery.
+  * `Day`: Day of discovery.
 * `pos`: dict containing:
   * `x`: X coordinate of the asteroid in m.
   * `y`: Y coordinate of the asteroid in m.
