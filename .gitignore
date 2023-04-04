@@ -4,6 +4,7 @@ package-lock.json
 venv
 server/database/raw
 server/database/processed
+server/database/databases
 __pycache__
 
 */.*
