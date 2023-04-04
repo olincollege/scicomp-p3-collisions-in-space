@@ -5,6 +5,8 @@ const oboe = require("oboe")
 import SpaceObject from './spaceObject';
 
 import * as THREE from 'three';
+import { degToRad } from "three/src/math/MathUtils"
+
 global.THREE = THREE;
 require("three/examples/js/controls/OrbitControls");
 require("three/examples/js/shaders/ConvolutionShader");
@@ -26,10 +28,12 @@ var gui = new dat.gui.GUI();
 
 // Show visualizaton options
 const viewerSettings = {
-  "Show orbits": true
+  "Show orbits": true,
+  "Bloom": true
 }
 const viewerSettingsFolder = gui.addFolder('Viewer');
 viewerSettingsFolder.add(viewerSettings, "Show orbits")
+viewerSettingsFolder.add(viewerSettings, "Bloom")
 viewerSettingsFolder.open()
 
 // Track visibility of bodies by type
@@ -231,19 +235,101 @@ const sketch = async ({ context, fps }) => {
     })
   }
 
+  let objectMesh, orbitMesh
+
+  const buildInstancedMesh = () => {
+    const initMesh = (count) => {
+      let objectGeometry = new THREE.SphereGeometry(1000000000, 3, 3)
+      let objectMaterial = new THREE.MeshPhysicalMaterial({
+        color: 'grey',
+        roughness: 1,
+        flatShading: false,
+      })
+      objectMesh = new THREE.InstancedMesh(objectGeometry, objectMaterial, count)
+      let orbitMaterial = new THREE.MeshPhysicalMaterial({
+        color: 'blue',
+        roughness: 1,
+        flatShading: true,
+      })
+      const orbitGeometry = new THREE.TorusGeometry(1, .0001, 3, 64);
+      orbitMesh = new THREE.InstancedMesh(orbitGeometry, orbitMaterial, count)
+
+      const dummyObject = new THREE.Object3D()
+      const dummyOrbit = new THREE.Object3D()
+      let i = 0
+
+      console.log("Building mesh...")
+      oboe({
+        url: pathToOrbitJSON,
+        headers: { "Access-Control-Allow-Headers": "*" }
+      })
+        .node('!.*', function (data) {
+          if (data == null) {
+            return
+          }
+          const pos = data.pos
+          dummyObject.position.set(pos.x, pos.y, pos.z)
+          dummyObject.updateMatrix();
+          objectMesh.setMatrixAt(i++, dummyObject.matrix);
+
+          dummyOrbit.rotateY(data.peri) // not sure where this is supposed to go
+          dummyOrbit.rotateZ(degToRad(data.node))
+          dummyOrbit.rotateX(degToRad(data.i))
+          dummyOrbit.scale.set(data["semi-major"] / 2, data["semi-minor"] / 2, data["semi-major"])
+          dummyOrbit.updateMatrix();
+          orbitMesh.setMatrixAt(i++, dummyOrbit.matrix);
+
+          return oboe.drop()
+        })
+        .done(() => {
+          scene.add(objectMesh)
+          scene.add(orbitMesh)
+          console.log('Mesh built!')
+        })
+        .fail(() => {
+          console.error('Failed to init mesh')
+        });
+    }
+
+    let count = 0
+    console.log("Counting objects...")
+    oboe({
+      url: pathToOrbitJSON,
+      headers: { "Access-Control-Allow-Headers": "*" }
+    })
+      .node('!.*', function (data) {
+        count += 1
+        if (count % 100000 == 0) {
+          console.log(count)
+        }
+        return oboe.drop()
+      })
+      .done(() => {
+        console.log('Counted space objects!')
+        initMesh(count)
+      })
+      .fail(() => {
+        console.error('Failed to count asteroids!')
+      });
+  }
+
   // Show or hide visibility based on body type and view settings
   const updateVisibility = () => {
     const isOrbitVisible = viewerSettings['Show orbits']
+    try {
+      orbitMesh.visible = isOrbitVisible
+    } catch { }
+    // Object.values(spaceObjects).forEach(spaceObjectsArray => {
+    //   spaceObjectsArray.forEach((spaceObject) => {
+    //     const isSpaceObjectVisible = bodyTypesVisibility[spaceObject.type]
 
-    Object.values(spaceObjects).forEach(spaceObjectsArray => {
-      spaceObjectsArray.forEach((spaceObject) => {
-        const isSpaceObjectVisible = bodyTypesVisibility[spaceObject.type]
-
-        spaceObject.setVisibility(isSpaceObjectVisible)
-        spaceObject.setOrbitVisibility(isOrbitVisible && isSpaceObjectVisible)
-      })
-    })
+    //     spaceObject.setVisibility(isSpaceObjectVisible)
+    //     spaceObject.setOrbitVisibility(isOrbitVisible && isSpaceObjectVisible)
+    //   })
+    // })
   }
+
+  buildInstancedMesh()
 
   return {
     // Handle resize events here
@@ -257,19 +343,20 @@ const sketch = async ({ context, fps }) => {
     render({ time, deltaTime }) {
 
       // Load current objects based on filter visibility
-      if (JSON.stringify(surveysVisibility) !== JSON.stringify(prevSurveysVisibility)) {
-        // need to do a more complex list of objects to unload and objects to load
-        loadObjectsBySurveys()
-        prevSurveysVisibility = JSON.parse(JSON.stringify(surveysVisibility))
-      }
+      // if (JSON.stringify(surveysVisibility) !== JSON.stringify(prevSurveysVisibility)) {
+      //   // need to do a more complex list of objects to unload and objects to load
+      //   loadObjectsBySurveys()
+      //   prevSurveysVisibility = JSON.parse(JSON.stringify(surveysVisibility))
+      // }
 
       // Show/hide objects based on type selection and view settings
       updateVisibility()
 
-      // Check if hovering over any objects, if so highlight in a color
-      const highlightedObjectIds = checkForHighlightedObjects()
-      highlightObjectsByID(highlightedObjectIds)
+      // // Check if hovering over any objects, if so highlight in a color
+      // const highlightedObjectIds = checkForHighlightedObjects()
+      // highlightObjectsByID(highlightedObjectIds)
 
+      bloomPass.enabled = viewerSettings.Bloom
       controls.update();
       composer.render();
     },
