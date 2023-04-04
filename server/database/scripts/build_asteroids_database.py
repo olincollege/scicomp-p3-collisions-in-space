@@ -7,7 +7,7 @@ from tqdm import tqdm
 DATABASE = "database/databases/asteroids_db.sqlite3"
 JSON = "database/processed/asteroids.json"
 COLS = (
-    "name", "number", "provisonal", "survey", "surveyId", "year", "month", "day",
+    "name", "number", "provisional", "survey", "surveyId", "year", "month", "day",
     "x", "y", "z", "semimajor", "semiminor", "c", "i", "node", "peri", "v"
 )
 
@@ -25,7 +25,7 @@ CREATE TABLE asteroids (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
     number TEXT,
-    provisonal TEXT,
+    provisional TEXT,
     survey TEXT,
     surveyId TEXT,
     year INT,

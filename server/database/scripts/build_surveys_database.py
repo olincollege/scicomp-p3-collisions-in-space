@@ -21,6 +21,7 @@ DROP TABLE IF EXISTS surveys;
 CREATE TABLE surveys (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     surveyId TEXT NOT NULL,
+    surveyName TEXT NOT NULL,
     asteroids TEXT
 );
         """
@@ -40,18 +41,21 @@ def fill_table(conn):
     c = conn.cursor()
     asteroids = asteroid_data()
     s2a = defaultdict(list)
+    s2n = {}
     i = 0
     for asteroid in asteroids:
         if asteroid["surveyId"] is None:
             continue
         s2a[asteroid["surveyId"]].append(i)
+        if asteroid["surveyId"] not in s2n:
+            s2n[asteroid["surveyId"]] = asteroid["survey"]
         i += 1
     data = [
-        (survey_id, ','.join(str(a) for a in asteroids))
+        (survey_id, s2n[survey_id], ','.join(str(a) for a in asteroids))
         for survey_id, asteroids in s2a.items()
     ]
     c.executemany(
-        f"INSERT INTO surveys (surveyId, asteroids) VALUES (?, ?)",
+        f"INSERT INTO surveys (surveyId, surveyName, asteroids) VALUES (?, ?, ?)",
         data
     )
     conn.commit()

@@ -23,7 +23,7 @@ def get_asteroid(asteroid_id):
     return {
         "name": metadata["name"],
         "number": metadata["number"],
-        "provisional": metadata["provisonal"],
+        "provisional": metadata["provisional"],
         "survey": metadata["survey"],
         "surveyId": metadata["surveyId"],
         "time": {
@@ -58,3 +58,7 @@ def get_survey(survey_id):
     return {
         "asteroids": asteroids
     }
+
+
+def get_surveys():
+    pass
