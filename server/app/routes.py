@@ -1,6 +1,6 @@
 from flask import jsonify, make_response
 
-from . import app
+from . import app, compress
 
 from .queries import (
     get_asteroids_metadata,
@@ -19,6 +19,7 @@ def api_get_meta():
 
 
 @app.route("/api/asteroids", methods=["GET"])
+@compress.compressed()
 def api_get_asteroids():
     return jsonify({
         "asteroids": get_asteroids(),
@@ -34,6 +35,7 @@ def api_get_asteroid(asteroid_id):
 
 
 @app.route("/api/surveys", methods=["GET"])
+@compress.compressed()
 def api_get_surveys():
     return jsonify({
         "surveys": get_surveys()
