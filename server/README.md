@@ -61,7 +61,7 @@ source venv/bin/activate  # Ensure the venv is active
 python database/scripts/parse_data.py
 ```
 
-See the database README.md for details on table formats.
+See the `database` README.md for details on table formats.
 
 ## Run
 

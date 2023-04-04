@@ -1,7 +1,7 @@
 # Data
 
 Descriptions and setup instructions for datasets and database.
-See `database` README for quick setup instructions
+See `server` README for quick setup instructions
 
 ## Database
 
@@ -57,7 +57,7 @@ python database/scripts/build_surveys_database.py
 The table contains:
 
 * `surveyId`: The ID of the survey that discovered the asteroid.
-* `asteroids`: Command delimited list of asteroid IDs.
+* `asteroids`: Comma delimited list of asteroid IDs.
 
 ## Datasets
 
