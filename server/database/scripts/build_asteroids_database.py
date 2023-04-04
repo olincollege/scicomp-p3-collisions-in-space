@@ -24,7 +24,7 @@ DROP TABLE IF EXISTS asteroids;
 CREATE TABLE asteroids (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
-    number TEXT NOT NULL,
+    number TEXT,
     provisonal TEXT,
     survey TEXT,
     surveyId TEXT,
