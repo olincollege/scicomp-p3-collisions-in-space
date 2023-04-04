@@ -20,8 +20,10 @@ require("three/examples/js/postprocessing/UnrealBloomPass");
 
 import * as dat from 'dat.gui';
 
-const pathToSurveyJSON = './data/processed/survey_codes.json'
-const pathToOrbitJSON = './data/processed/asteroids.json'
+const apiURL = 'http://127.0.0.1:5000/api'
+const metadataEndpoint = apiURL + '/meta'
+const asteroidsEndpoint = apiURL + '/asteroids'
+const surveysEndpoint = apiURL + '/surveys'
 
 // Initialize Gui
 var gui = new dat.gui.GUI();
@@ -51,11 +53,8 @@ let prevSurveysVisibility = {}
 const surveysFolder = gui.addFolder('Surveys');
 
 // Fetch survey lists and show in gui
-oboe({
-  url: pathToSurveyJSON,
-  headers: { "Access-Control-Allow-Headers": "*" }
-})
-  .node('!*.', function (surveyName) {
+oboe({url: surveysEndpoint})
+  .node('!surveys.*', function (surveyName) {
     surveysVisibility[surveyName] = false
   })
   .done(() => {
@@ -106,7 +105,9 @@ const sketch = async ({ context, fps }) => {
 
   // Configure camera to look at scene
   const initializeCamera = () => {
-    const camera = new THREE.PerspectiveCamera(45, 1, cameraMinRenderDepth, cameraMaxRenderDepth);
+    const camera = new THREE.PerspectiveCamera(
+      45, 1, cameraMinRenderDepth, cameraMaxRenderDepth
+    );
     camera.position.z = 5000000000000;
     camera.rotation.y = Math.PI
     camera.lookAt(new THREE.Vector3())
@@ -259,11 +260,8 @@ const sketch = async ({ context, fps }) => {
       let i = 0
 
       console.log("Building mesh...")
-      oboe({
-        url: pathToOrbitJSON,
-        headers: { "Access-Control-Allow-Headers": "*" }
-      })
-        .node('!.*', function (data) {
+      oboe({url: asteroidsEndpoint})
+        .node('!asteroids.*', function (data) {
           if (data == null) {
             return
           }
@@ -292,24 +290,17 @@ const sketch = async ({ context, fps }) => {
     }
 
     let count = 0
-    console.log("Counting objects...")
-    oboe({
-      url: pathToOrbitJSON,
-      headers: { "Access-Control-Allow-Headers": "*" }
-    })
-      .node('!.*', function (data) {
-        count += 1
-        if (count % 100000 == 0) {
-          console.log(count)
-        }
-        return oboe.drop()
+    oboe({url: metadataEndpoint})
+      .node('!asteroids', function (data) {
+        count = data.n
       })
       .done(() => {
         console.log('Counted space objects!')
         initMesh(count)
       })
-      .fail(() => {
+      .fail((thrown) => {
         console.error('Failed to count asteroids!')
+        console.error(thrown)
       });
   }
 
