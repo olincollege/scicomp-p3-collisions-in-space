@@ -4,8 +4,8 @@ import json_stream
 from tqdm import tqdm
 
 
-DATABASE = "databases/asteroids_db.sqlite3"
-JSON = "processed/asteroids.json"
+DATABASE = "database/databases/asteroids_db.sqlite3"
+JSON = "database/processed/asteroids.json"
 COLS = (
     "name", "number", "provisonal", "survey", "surveyId", "year", "month", "day",
     "x", "y", "z", "semimajor", "semiminor", "c", "i", "node", "peri", "v"

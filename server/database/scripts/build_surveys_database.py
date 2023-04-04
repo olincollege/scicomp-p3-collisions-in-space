@@ -5,8 +5,8 @@ import json_stream
 from tqdm import tqdm
 
 
-DATABASE = "databases/asteroids_db.sqlite3"
-JSON = "processed/asteroids.json"
+DATABASE = "database/databases/asteroids_db.sqlite3"
+JSON = "database/processed/asteroids.json"
 
 
 def create_table(conn):

@@ -1,70 +1,65 @@
 # Data
 
-## Setup
+Descriptions and setup instructions for datasets and database.
+See `database` README for quick setup instructions
 
-Before running any scripts:
+## Database
 
-1. (Recommended) Setup and activate a virtual environment:
+Descriptions of the database and how to set it up.
 
-```
-cd data/
-python -m venv venv
-source venv/bin/activate
-```
+Below datasets must all be parsed before the database can be made.
 
-2. Install dependencies:
+### Asteroids
 
-```
-pip install -r requirements.txt
-```
-
-## Quickstart
-
-To generate the data necessary to run the visualization, either setup each
-below dataset individually, or do the following:
-
-1. Download the MPC orbital data:
-   1. Get the data from
-      [here](https://www.minorplanetcenter.net/iau/MPCORB/MPCORB.DAT.gz).
-   2. Move the orbital data to `raw`:
-
-    ```
-    mv ~/Downloads/MPCORB.DAT.gz raw/.  # Assumes Downloads directory
-    gunzip raw/MPCORB.DAT.gz
-    ```
-
-2. Download the MPC observations data:
-   1. Get the data from
-      [here](https://www.minorplanetcenter.net/iau/ECS/MPCAT-OBS/NumObs.txt.gz).
-   2. Move the observation data to `raw`:
-
-    ```
-    mv ~/Downloads/NumObs.txt.gz raw/.  # Assumes Downloads directory
-    gunzip raw/NumObs.txt.gz
-    ```
-
-3. Download the MPC surveys data:
-    1. Get the data from
-       [here](https://www.minorplanetcenter.net/iau/lists/ObsCodes.html). (Must
-       save the page as a local file.)
-    2. Move the survey data to `raw`:
-
-    ```
-    mv ~/Downloads/ObsCodes.html raw/.  # Assumes Downloads directory
-    ```
-
-4. Run the data parsing script (this will take some time):
+Table containing metadata associated with every asteroid. Keyed by where the
+asteroid appears in the asteroids.json file. Ex: Ceres is the first element in
+the json file, and so has the ID `1`. To setup:
 
 ```
-source venv/bin/activate  # Ensure the venv is active
-python scripts/parse_data.py
+python database/scripts/build_asteroids_database.py
 ```
 
-See below for documentation on the contents of the generated data.
+The table contains:
+
+* `name`: The name of the asteroid, "Un-Named" if not set in the MPC data.
+* `number`: Packed 5 digit numerical designation of the asteroid. Null if the asteroid
+  only has a provisional designation.
+* `provisional`: Packed 7 digit provisional designation of the asteroid. Null if
+  the asteroid has been assigned a number.
+* `survey`: The name of the survey that discovered the asteroid. Null if the
+  asteroid is not linked to a survey.
+* `surveyId`: The ID of the survey that discovered the asteroid. Null if the
+  asteroid is not linked to a survey.
+* `year`: Year of discovery. Null if the asteroid is not linked to a survey.
+* `month`: Month of discovery. Null if the asteroid is not linked to a survey.
+* `Day`: Day of discovery. Null if the asteroid is not linked to a survey.
+* `x`: X coordinate of the asteroid in m.
+* `y`: Y coordinate of the asteroid in m.
+* `z`: Z coordinate of the asteroid in m.
+* `semimajor`: Size of the semi-major axis of the orbit in m.
+* `semiminor`: Size of the semi-minor axis of the orbit in m.
+* `c`: Distance from the center of the orbit to the foci in m.
+* `i`: Inclination of the orbit in degrees. (Rotation from the xy-plane.)
+* `node`: Longitude of the ascending node of the orbit in degrees. (Rotation
+  around the z-axis.)
+* `peri`: Argument of the periapsis of the orbit in degrees.
+* `v`: True anomaly of the asteroid in degrees.
+
+### Surveys
+
+Table containing a mapping of survey IDs to asteroid IDs. Asteroid IDs are as
+they appear in the asteroids table. To setup:
+
+```
+python database/scripts/build_surveys_database.py
+```
+
+The table contains:
+
+* `surveyId`: The ID of the survey that discovered the asteroid.
+* `asteroids`: Command delimited list of asteroid IDs.
 
 ## Datasets
-
-All below datasets are required to run this project.
 
 Before running scripts, ensure the venv is activated with
 
@@ -82,23 +77,25 @@ following python script. Note that it may take a few minutes for data to be
 parsed. 
 
 ```
-python scripts/combine_datasets.py
+python database/scripts/combine_datasets.py
 ```
 
-The resulting json object is created as `/processed/asteroids.json` and is an array
-where each object has the keys:
+The resulting json object is created as `database/processed/asteroids.json` and
+is an array where each object has the keys:
 
 * `name`: The name of the asteroid, "Un-Named" if not set in the MPC data.
 * `number`: Packed 5 digit numerical designation of the asteroid. Null if the asteroid
   only has a provisional designation.
 * `provisional`: Packed 7 digit provisional designation of the asteroid. Null if
   the asteroid has been assigned a number.
-* `survey`: The name of the survey that discovered the asteroid.
-* `surveyId`: The ID of the survey that discovered the asteroid.
+* `survey`: The name of the survey that discovered the asteroid. Null if the
+  asteroid is not linked to a survey.
+* `surveyId`: The ID of the survey that discovered the asteroid. Null if the
+  asteroid is not linked to a survey.
 * `time`: dict containing:
-  * `year`: Year of discovery.
-  * `month`: Month of discovery.
-  * `Day`: Day of discovery.
+  * `year`: Year of discovery. Null if the asteroid is not linked to a survey.
+  * `month`: Month of discovery. Null if the asteroid is not linked to a survey.
+  * `Day`: Day of discovery. Null if the asteroid is not linked to a survey.
 * `pos`: dict containing:
   * `x`: X coordinate of the asteroid in m.
   * `y`: Y coordinate of the asteroid in m.
@@ -122,13 +119,13 @@ Then, move the file to `raw`, unzip the file and run the following python
 script. Note that it may take a few minutes for data to be parsed.
 
 ```
-mv ~/Downloads/MPCORB.DAT.gz raw/.  # Assumes Downloads directory
-gunzip raw/MPCORB.DAT.gz
-python scripts/parse_mpcord.py
+mv ~/Downloads/MPCORB.DAT.gz database/raw/.  # Assumes Downloads directory
+gunzip database/raw/MPCORB.DAT.gz
+python database/scripts/parse_mpcord.py
 ```
 
-The resulting json object is created as `/processed/orbits.json` and is an array
-where each object has the keys:
+The resulting json object is created as `database/processed/orbits.json` and is
+an array where each object has the keys:
 
 * `name`: The name of the asteroid, "Un-Named" if not set in the MPC data.
 * `number`: Packed 5 digit numerical designation of the asteroid. Null if the asteroid
@@ -158,13 +155,14 @@ Then, move the file to `raw`, unzip the file and run the following python
 script. Note that it may take a few minutes for data to be parsed.
 
 ```
-mv ~/Downloads/NumObs.txt.gz raw/.  # Assumes Downloads directory
-gunzip raw/NumObs.txt.gz
-python scripts/parse_numobs.py
+mv ~/Downloads/NumObs.txt.gz database/raw/.  # Assumes Downloads directory
+gunzip database/raw/NumObs.txt.gz
+python database/scripts/parse_numobs.py
 ```
 
-The resulting json object is created as `/processed/survey_attribution.json` and
-is an array where each object has the keys:
+The resulting json object is created as
+`database/processed/survey_attribution.json` and is an array where each object
+has the keys:
 
 * `number`: Packed 5 digit numerical designation of the asteroid.
 * `surveyId`: 3 letter survey ID.
@@ -184,12 +182,12 @@ the page as a local file.) Then, move the file to `raw` and run the following
 python script.
 
 ```
-mv ~/Downloads/ObsCodes.html raw/.  # Assumes Downloads directory
-python scripts/parse_obscodes.py
+mv ~/Downloads/ObsCodes.html database/raw/.  # Assumes Downloads directory
+python database/scripts/parse_obscodes.py
 ```
 
-The resulting json object is created as `/processed/survey_codes.json` and
-is an dictionary where each key is:
+The resulting json object is created as `database/processed/survey_codes.json`
+and is an dictionary where each key is:
 
 * `surveyId`: 3 letter survey ID.
 
