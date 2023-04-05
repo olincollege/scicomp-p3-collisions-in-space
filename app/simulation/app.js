@@ -4,7 +4,7 @@ const oboe = require("oboe")
 
 import SpaceObject from './spaceObject';
 import initializeGui from './gui';
-import { initializeRaycaster } from './raycasting'
+import { initializeRaycaster, doHover } from './raycasting'
 import { initializeInstancedMesh } from './mesh'
 
 import * as THREE from 'three';
@@ -20,7 +20,7 @@ require("three/examples/js/postprocessing/ShaderPass");
 require("three/examples/js/postprocessing/BloomPass");
 require("three/examples/js/postprocessing/UnrealBloomPass");
 
-let guiSettings = initializeGui()
+let [guiSettings, display] = initializeGui()
 
 // set camera render limits
 const cameraMinRenderDepth = 1e10
@@ -93,13 +93,13 @@ const sketch = async ({ context, fps }) => {
   composer.setSize(window.innerWidth, window.innerHeight);
 
   const { raycaster, mouse } = initializeRaycaster()
-  let { objectMesh, orbitMesh } = initializeInstancedMesh(scene)
+  let meshes = initializeInstancedMesh(scene)
 
   // Show or hide visibility based on body type and view settings
   const updateVisibility = () => {
     const isOrbitVisible = guiSettings.viewer['Show Orbits']
     try {
-      orbitMesh.visible = isOrbitVisible
+      meshes.orbits.visible = isOrbitVisible
     } catch {}
   }
 
@@ -113,13 +113,8 @@ const sketch = async ({ context, fps }) => {
     },
     // And render events here
     render({ time, deltaTime }) {
-      // Show/hide objects based on type selection and view settings
       updateVisibility()
-
-      // // Check if hovering over any objects, if so highlight in a color
-      // const highlightedObjectIds = checkForHighlightedObjects()
-      // highlightObjectsByID(highlightedObjectIds)
-
+      doHover(raycaster, mouse, camera, meshes)
       bloomPass.enabled = guiSettings.viewer.Bloom
       controls.update();
       composer.render();

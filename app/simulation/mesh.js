@@ -8,6 +8,7 @@ let initialized = false
 let numAsteroids
 let surveyMap
 let objectMesh, orbitMesh
+let meshes = {}
 let matrixCache = {}
 
 const initializeInstancedMesh = (scene) => {
@@ -18,14 +19,16 @@ const initializeInstancedMesh = (scene) => {
       roughness: 1,
       flatShading: false,
     })
-    objectMesh = new THREE.InstancedMesh(objectGeometry, objectMaterial, numAsteroids)
+    meshes.asteroids = new THREE.InstancedMesh(objectGeometry, objectMaterial, numAsteroids)
     let orbitMaterial = new THREE.MeshPhysicalMaterial({
       color: 'blue',
       roughness: 1,
       flatShading: true,
     })
     const orbitGeometry = new THREE.TorusGeometry(1, .0001, 3, 64);
-    orbitMesh = new THREE.InstancedMesh(orbitGeometry, orbitMaterial)
+    meshes.orbits = new THREE.InstancedMesh(orbitGeometry, orbitMaterial)
+
+    let neutralColor = new THREE.Color("grey")
 
     const dummyObject = new THREE.Object3D()
     const dummyOrbit = new THREE.Object3D()
@@ -41,7 +44,8 @@ const initializeInstancedMesh = (scene) => {
       cacheMatrix.copy(dummyObject.matrix)
       matrixCache[i] = cacheMatrix
 
-      objectMesh.setMatrixAt(i++, dummyObject.matrix);
+      meshes.asteroids.setColorAt(i, neutralColor)
+      meshes.asteroids.setMatrixAt(i++, dummyObject.matrix);
 
       // dummyOrbit.rotateY(data.peri) // not sure where this is supposed to go
       // dummyOrbit.rotateZ(degToRad(data.node))
@@ -52,11 +56,11 @@ const initializeInstancedMesh = (scene) => {
       //   data["semi-major"]
       // )
       // dummyOrbit.updateMatrix();
-      // orbitMesh.setMatrixAt(j++, dummyOrbit.matrix);
+      // meshes.orbits.setMatrixAt(j++, dummyOrbit.matrix);
     }
     const doneCallback = () => {
-      scene.add(objectMesh)
-      scene.add(orbitMesh)
+      scene.add(meshes.asteroids)
+      scene.add(meshes.orbits)
       initialized = true
     }
     console.log("Building mesh...")
@@ -79,7 +83,7 @@ const initializeInstancedMesh = (scene) => {
   }
   getSurveys(surveyNodeCallback, () => {})
 
-  return { objectMesh, orbitMesh }
+  return meshes
 }
 
 let currentUpdate = 0
@@ -112,12 +116,12 @@ const updateInstancedMesh = (surveyVisibility) => {
     const emptyMatrix = new THREE.Matrix4()
     for (let i = 0; i < numAsteroids; i++) {
       if (!visibleAsteroids.has(i + 1)) {
-        objectMesh.setMatrixAt(i, emptyMatrix);
+        meshes.asteroids.setMatrixAt(i, emptyMatrix);
       } else {
-        objectMesh.setMatrixAt(i, matrixCache[i])
+        meshes.asteroids.setMatrixAt(i, matrixCache[i])
       }
     }
-    objectMesh.instanceMatrix.needsUpdate = true
+    meshes.asteroids.instanceMatrix.needsUpdate = true
     console.log("Updated mesh!")
   }
 

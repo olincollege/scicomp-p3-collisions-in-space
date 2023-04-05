@@ -1,4 +1,4 @@
-import * as dat from 'dat.gui';
+import GUI from 'lil-gui';
 const oboe = require("oboe")
 
 import { getSurveys } from './api';
@@ -9,7 +9,7 @@ const buildViewerGui = (gui) => {
   // Show visualizaton options
   const viewerSettings = {
     "Show Orbits": true,
-    "Bloom": true
+    "Bloom": true,
   }
   const viewerSettingsFolder = gui.addFolder('Viewer');
   viewerSettingsFolder.add(viewerSettings, "Show Orbits")
@@ -79,12 +79,40 @@ const buildSurveysGui = (gui) => {
   return surveysVisibility
 }
 
+const buildDisplay = () => {
+  let display = new GUI({autoPlace: false, width: 300});
+  const element = document.createElement('div')
+  element.appendChild(display.domElement)
+  element.style.position = "absolute"
+  element.style.top = "0"
+  element.style.left = "20px"
+  document.body.appendChild(element)
+
+  let data = {
+    "Name": "",
+    "Number": "",
+    "Provisional Designation": "",
+    "Survey": "",
+    "Discovery Time": ""
+  }
+  const metadataFolder = display.addFolder('Metadata');
+  Object.keys(data).forEach((key) => {
+    let controller = metadataFolder.add(data, key)
+    controller.disable()
+  })
+
+  return display
+}
+
 export default () => {
   // Initialize Gui
-  let gui = new dat.gui.GUI();
+  let gui = new GUI({width: 300});
   let settings = {}
   settings.viewer = buildViewerGui(gui)
   settings.bodies = buildBodiesGui(gui)
   settings.surveys = buildSurveysGui(gui)
-  return settings
+
+  let display = buildDisplay()
+
+  return [settings, display]
 }

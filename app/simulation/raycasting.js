@@ -17,31 +17,28 @@ const initializeRaycaster = () => {
   return { raycaster, mouse }
 }
 
-const checkForHighlightedObjects = (raycaster, mouse, camera) => {
+let lastHover
+let hoverColor = new THREE.Color("red")
+let neutralColor = new THREE.Color("grey")
+const doHover = (raycaster, mouse, camera, meshes) => {
+  if (meshes.asteroids === undefined) {
+    return
+  }
+
   raycaster.setFromCamera(mouse, camera);
-
-  // Search for intersections between mouse cursor and objects
-  const highlightedObjectIds = []
-  Object.values(spaceObjects).forEach(spaceObjectsArray => {
-    spaceObjectsArray.forEach((spaceObject) => {
-      const intersection = raycaster.intersectObject(spaceObject.objectMesh);
-      if (intersection.length > 0) {
-        highlightedObjectIds.push(intersection[0].object.uuid)
-      }
-    })
-  })
-
-  return highlightedObjectIds
+  const intersection = raycaster.intersectObject(meshes.asteroids)
+  if (intersection.length > 0) {
+    const instanceId = intersection[0].instanceId
+    if (instanceId == lastHover) {
+      return
+    }
+    meshes.asteroids.setColorAt(instanceId, hoverColor)
+    if (lastHover !== undefined) {
+      meshes.asteroids.setColorAt(lastHover, neutralColor)
+    }
+    lastHover = instanceId
+    meshes.asteroids.instanceColor.needsUpdate = true
+  }
 }
 
-// Highlights objects based on uuid
-const highlightObjectsByID = (uuid) => {
-  Object.values(spaceObjects).forEach(spaceObjectsArray => {
-    spaceObjectsArray.forEach(spaceObject => {
-      const isHighlighted = (spaceObject.objectMesh.uuid == uuid)
-      spaceObject.setHighlighted(isHighlighted)
-    })
-  })
-}
-
-export { initializeRaycaster, checkForHighlightedObjects, highlightObjectsByID }
+export { initializeRaycaster, doHover }
