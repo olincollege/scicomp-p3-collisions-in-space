@@ -6,12 +6,12 @@ from json_stream import streamable_list
 from tqdm import tqdm
 
 
-ORBITS_PATH = "processed/orbits.json"
-OBSERVATIONS_PATH = "processed/survey_attribution.json"
-SURVEY_ID_PATH = "processed/survey_codes.json"
+ORBITS_PATH = "database/processed/orbits.json"
+OBSERVATIONS_PATH = "database/processed/survey_attribution.json"
+SURVEY_ID_PATH = "database/processed/survey_codes.json"
 
-READ_PATH = "raw/mpcorb_extended.json"
-WRITE_PATH = "processed/asteroids.json"
+READ_PATH = "database/raw/mpcorb_extended.json"
+WRITE_PATH = "database/processed/asteroids.json"
 
 LINKED = 0
 UNLINKED = 0
@@ -82,7 +82,7 @@ def unlinked_orbit(orbit):
             "day": None,
         },
     })
-
+    return orbit
 
 
 def fill_cache(observations, cache, i=10000):
@@ -119,7 +119,9 @@ def combine_datasets():
                 if h_orbit["number"] in cache:
                     yield hit_cache(h_orbit, cache, id_to_name)
                 else:
-                    yield unlinked_orbit(h_orbit)
+                    # yield unlinked_orbit(h_orbit)
+                    # Don't save orbits that don't have a survey
+                    pass
             h_orbit = []
             hanging_orbits = _replacement
         else:

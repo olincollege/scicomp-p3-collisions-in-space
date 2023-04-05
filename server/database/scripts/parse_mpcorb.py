@@ -7,8 +7,8 @@ from json_stream import streamable_list
 from tqdm import tqdm
 
 
-READ_PATH = "raw/MPCORB.DAT"
-WRITE_PATH = "processed/orbits.json"
+READ_PATH = "database/raw/MPCORB.DAT"
+WRITE_PATH = "database/processed/orbits.json"
 PARSED = 0
 
 

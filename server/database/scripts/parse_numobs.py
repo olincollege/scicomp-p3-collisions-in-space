@@ -5,8 +5,8 @@ from json_stream import streamable_list
 from tqdm import tqdm
 
 
-READ_PATH = "raw/NumObs.txt"
-WRITE_PATH = "processed/survey_attribution.json"
+READ_PATH = "database/raw/NumObs.txt"
+WRITE_PATH = "database/processed/survey_attribution.json"
 PARSED = 0
 SET = set()
 

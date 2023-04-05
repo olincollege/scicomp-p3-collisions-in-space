@@ -5,8 +5,8 @@ from json_stream import streamable_dict
 from tqdm import tqdm
 
 
-READ_PATH = "raw/ObsCodes.html"
-WRITE_PATH = "processed/survey_codes.json"
+READ_PATH = "database/raw/ObsCodes.html"
+WRITE_PATH = "database/processed/survey_codes.json"
 PARSED = 0
 
 
