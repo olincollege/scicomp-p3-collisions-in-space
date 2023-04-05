@@ -8,6 +8,7 @@ let initialized = false
 let numAsteroids
 let surveyMap
 let objectMesh, orbitMesh
+let matrixCache = {}
 
 const initializeInstancedMesh = (scene) => {
   const initMesh = () => {
@@ -35,6 +36,11 @@ const initializeInstancedMesh = (scene) => {
       const pos = data.pos
       dummyObject.position.set(pos.x, pos.y, pos.z)
       dummyObject.updateMatrix();
+
+      let cacheMatrix = new THREE.Matrix4()
+      cacheMatrix.copy(dummyObject.matrix)
+      matrixCache[i] = cacheMatrix
+
       objectMesh.setMatrixAt(i++, dummyObject.matrix);
 
       // dummyOrbit.rotateY(data.peri) // not sure where this is supposed to go
@@ -76,10 +82,14 @@ const initializeInstancedMesh = (scene) => {
   return { objectMesh, orbitMesh }
 }
 
+let currentUpdate = 0
 const updateInstancedMesh = (surveyVisibility) => {
   if (!initialized || surveyMap == null) {
     return
   }
+
+  currentUpdate += 1
+  let updateId = currentUpdate
 
   const surveyIds = Object.entries(surveyVisibility)
     .filter(([survey, isVisible]) => {
@@ -94,13 +104,21 @@ const updateInstancedMesh = (surveyVisibility) => {
   const target = surveyIds.length
   
   const updateMesh = () => {
+    if (currentUpdate != updateId) {
+      console.log("Aborting update, new update available.")
+      return
+    }
+    console.log("Updating mesh...")
     const emptyMatrix = new THREE.Matrix4()
     for (let i = 0; i < numAsteroids; i++) {
       if (!visibleAsteroids.has(i + 1)) {
         objectMesh.setMatrixAt(i, emptyMatrix);
+      } else {
+        objectMesh.setMatrixAt(i, matrixCache[i])
       }
     }
     objectMesh.instanceMatrix.needsUpdate = true
+    console.log("Updated mesh!")
   }
 
   if (surveyIds.length == 0) {
