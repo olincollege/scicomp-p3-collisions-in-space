@@ -9,17 +9,19 @@ const buildViewerGui = (gui) => {
   const viewerSettings = {
     "Show Orbits": true,
     "Bloom": true,
+    "Bloom Strength": 1.5,
   }
   const viewerSettingsFolder = gui.addFolder('Viewer');
   viewerSettingsFolder.add(viewerSettings, "Show Orbits")
   viewerSettingsFolder.add(viewerSettings, "Bloom")
+  viewerSettingsFolder.add(viewerSettings, "Bloom Strength", 0, 5)
   viewerSettingsFolder.open()
   return viewerSettings
 }
 
 const buildBodiesGui = (gui) => {
   // Track visibility of bodies by type
-  const bodyTypesVisibility = { "Stars": true, "Planets": true, "Asteroids": true }
+  const bodyTypesVisibility = { "Stars": true, "Solar System": true, "Asteroids": true }
   const bodyTypesFolder = gui.addFolder('Body Types');
   Object.entries(bodyTypesVisibility).forEach(([bodyType, state]) => {
     bodyTypesFolder.add(bodyTypesVisibility, bodyType)

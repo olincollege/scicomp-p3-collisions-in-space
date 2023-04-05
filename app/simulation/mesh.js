@@ -11,7 +11,7 @@ let matrixCache = {}
 
 const initializeInstancedMesh = (scene) => {
   const initMesh = () => {
-    let objectGeometry = new THREE.SphereGeometry(1000000000, 3, 3)
+    let objectGeometry = new THREE.SphereGeometry(1000000000, 5, 4)
     let objectMaterial = new THREE.MeshPhysicalMaterial({
       color: 'white',
       roughness: 1,
@@ -36,6 +36,7 @@ const initializeInstancedMesh = (scene) => {
     const nodeCallback = (data) => {
       const pos = data.pos
       dummyObject.position.set(pos.x, pos.y, pos.z)
+      dummyObject.rotateY(Math.random() * Math.PI)
       dummyObject.updateMatrix();
 
       let cacheMatrix = new THREE.Matrix4()
