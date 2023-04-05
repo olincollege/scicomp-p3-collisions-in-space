@@ -20,6 +20,20 @@ const streamAsteroids = (nodeCallback, doneCallback) => {
     });
 }
 
+const getAsteroid = (asteroidId, nodeCallback, doneCallback) => {
+  oboe({url: asteroidsEndpoint + "/" + asteroidId})
+    .node('!.', function (data) {
+      nodeCallback(data)
+    })
+    .done(() => {
+      console.log('Loaded asteroid ' + asteroidId)
+      doneCallback()
+    })
+    .fail(() => {
+      console.error('Failed to load asteroid ' + asteroidId)
+    });
+}
+
 const getMetadata = (nodeCallback, doneCallback) => {
     let count = 0
     oboe({url: metadataEndpoint})
@@ -64,4 +78,4 @@ const getSurvey = (surveyId, nodeCallback, doneCallback) => {
     });
 }
 
-export { streamAsteroids, getMetadata, getSurveys, getSurvey }
+export { streamAsteroids, getAsteroid, getMetadata, getSurveys, getSurvey }

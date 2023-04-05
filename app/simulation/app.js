@@ -114,7 +114,7 @@ const sketch = async ({ context, fps }) => {
     // And render events here
     render({ time, deltaTime }) {
       updateVisibility()
-      doHover(raycaster, mouse, camera, meshes)
+      doHover(raycaster, mouse, camera, meshes, display)
       bloomPass.enabled = guiSettings.viewer.Bloom
       controls.update();
       composer.render();
