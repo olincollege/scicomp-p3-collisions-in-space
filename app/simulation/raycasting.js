@@ -39,7 +39,7 @@ const updateDisplay = (asteroidId, display) => {
       controller.setValue(data[controller.property])
     })
   }
-  getAsteroid(asteroidId, nodeCallback, () => {})
+  getAsteroid(asteroidId + 1, nodeCallback, () => {})
 }
 
 let lastHover
