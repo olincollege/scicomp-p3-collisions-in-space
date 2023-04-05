@@ -4,7 +4,7 @@ from flask_compress import Compress
 
 app = Flask(__name__)
 
-CORS(app, resources={r"/*": {"origins": "*"}})
+CORS(app, resources={r"/*": {"origins": ["*", "null"]}})
 
 app.config["COMPRESS_REGISTER"] = False
 compress = Compress()
