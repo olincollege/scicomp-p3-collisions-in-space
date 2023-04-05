@@ -1,7 +1,7 @@
 # Visualizing Asteroids
 A web-based 3D visualizer of asteroid positions using the [Minor Planet Center](https://www.minorplanetcenter.net)'s data. Created by [@eito-fis](https://github.com/eito-fis) and [@jasperkatzban](https://github.com/jasperkatzban) during the 2023 Scientific Computing course taught by [@nugent-lab](https://github.com/nugent-lab) at [@olincollege](https://www.olin.edu).
 
-![demo image](demo.png)
+![demo image](demo.jpg)
 
 ## Features:
 * Visualization of hundreds of thousands of asteroids’ positions
