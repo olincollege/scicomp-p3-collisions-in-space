@@ -13,7 +13,7 @@ const initializeInstancedMesh = (scene) => {
   const initMesh = () => {
     let objectGeometry = new THREE.SphereGeometry(1000000000, 3, 3)
     let objectMaterial = new THREE.MeshPhysicalMaterial({
-      color: 'grey',
+      color: 'white',
       roughness: 1,
       flatShading: false,
     })

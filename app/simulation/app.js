@@ -79,7 +79,7 @@ const sketch = async ({ context, fps }) => {
   const bloomPass = new THREE.UnrealBloomPass(
     new THREE.Vector2(window.innerWidth, window.innerHeight)
   );
-  bloomPass.strength = 3;
+  bloomPass.strength = 1.5;
   bloomPass.threshold = .01;
   bloomPass.radius = 1;
 
