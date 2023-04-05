@@ -1,5 +1,4 @@
 import GUI from 'lil-gui';
-const oboe = require("oboe")
 
 import { getSurveys } from './api';
 import { updateInstancedMesh } from './mesh'
@@ -31,7 +30,7 @@ const buildBodiesGui = (gui) => {
 
 const buildSurveysGui = (gui) => {
   // Track visibility of bodies by survey
-  let surveysVisibility = {"All": true}
+  let surveysVisibility = { "All": true }
   let controllers = []
   const surveysFolder = gui.addFolder('Surveys');
 
@@ -80,7 +79,7 @@ const buildSurveysGui = (gui) => {
 }
 
 const buildDisplay = () => {
-  let display = new GUI({autoPlace: false, width: 300});
+  let display = new GUI({ autoPlace: false, width: 300 });
   const element = document.createElement('div')
   element.appendChild(display.domElement)
   element.style.position = "absolute"
@@ -106,7 +105,7 @@ const buildDisplay = () => {
 
 export default () => {
   // Initialize Gui
-  let gui = new GUI({width: 300});
+  let gui = new GUI({ width: 300 });
   let settings = {}
   settings.viewer = buildViewerGui(gui)
   settings.bodies = buildBodiesGui(gui)

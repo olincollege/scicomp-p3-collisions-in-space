@@ -1,6 +1,4 @@
-const oboe = require("oboe")
 import * as THREE from 'three';
-import { degToRad } from "three/src/math/MathUtils"
 
 import { streamAsteroids, getMetadata, getSurveys, getSurvey } from './api';
 
@@ -34,7 +32,7 @@ const initializeInstancedMesh = (scene) => {
     const dummyOrbit = new THREE.Object3D()
     let i = 0
     let j = 0
-  
+
     const nodeCallback = (data) => {
       const pos = data.pos
       dummyObject.position.set(pos.x, pos.y, pos.z)
@@ -66,7 +64,7 @@ const initializeInstancedMesh = (scene) => {
     console.log("Building mesh...")
     streamAsteroids(nodeCallback, doneCallback)
   }
-  
+
   const countNodeCallback = (data) => {
     numAsteroids = data.asteroids.n
   }
@@ -81,7 +79,7 @@ const initializeInstancedMesh = (scene) => {
     })
     surveyMap = Object.fromEntries(flipped)  // Name to ID mapping
   }
-  getSurveys(surveyNodeCallback, () => {})
+  getSurveys(surveyNodeCallback, () => { })
 
   return meshes
 }
@@ -106,7 +104,7 @@ const updateInstancedMesh = (surveyVisibility) => {
   const visibleAsteroids = new Set()
   let count = 0
   const target = surveyIds.length
-  
+
   const updateMesh = () => {
     if (currentUpdate != updateId) {
       console.log("Aborting update, new update available.")

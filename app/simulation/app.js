@@ -1,8 +1,5 @@
 import canvasSketch from 'canvas-sketch';
 
-const oboe = require("oboe")
-
-import SpaceObject from './spaceObject';
 import initializeGui from './gui';
 import { initializeRaycaster, doHover } from './raycasting'
 import { initializeInstancedMesh } from './mesh'
@@ -100,7 +97,7 @@ const sketch = async ({ context, fps }) => {
     const isOrbitVisible = guiSettings.viewer['Show Orbits']
     try {
       meshes.orbits.visible = isOrbitVisible
-    } catch {}
+    } catch { }
   }
 
   return {
