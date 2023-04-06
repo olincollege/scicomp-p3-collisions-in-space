@@ -12,7 +12,7 @@ const buildViewerGui = (gui) => {
     "Bloom Strength": 1.5,
   }
   const viewerSettingsFolder = gui.addFolder('Viewer');
-  viewerSettingsFolder.add(viewerSettings, "Show Orbits")
+  // viewerSettingsFolder.add(viewerSettings, "Show Orbits")
   viewerSettingsFolder.add(viewerSettings, "Bloom")
   viewerSettingsFolder.add(viewerSettings, "Bloom Strength", 0, 5)
   viewerSettingsFolder.open()
@@ -64,15 +64,17 @@ const buildSurveysGui = (gui) => {
   }
   const doneCallback = () => {
     // Add to menu
-    controllers = Object.keys(surveysVisibility).map((surveyName) => {
-      let controller = surveysFolder.add(surveysVisibility, surveyName)
-      if (surveyName == 'All') {
-        controller.onChange(allCallback)
-      } else {
-        controller.onChange(callback)
-      }
-      return controller
-    });
+    controllers = Object.keys(surveysVisibility)
+      .sort()
+      .map((surveyName) => {
+        let controller = surveysFolder.add(surveysVisibility, surveyName)
+        if (surveyName == 'All') {
+          controller.onChange(allCallback)
+        } else {
+          controller.onChange(callback)
+        }
+        return controller
+      });
     surveysFolder.open()
   }
   getSurveys(nodeCallback, doneCallback)
