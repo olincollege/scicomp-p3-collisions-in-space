@@ -5,7 +5,7 @@ from json_stream import streamable_list
 from tqdm import tqdm
 
 
-READ_PATH = "database/raw/NumObs.txt"
+READ_PATH = "database/raw/AllObs.txt"
 WRITE_PATH = "database/processed/survey_attribution.json"
 PARSED = 0
 SET = set()
@@ -18,8 +18,9 @@ def parse_line(line):
         return None
 
     if len(id_) != 13:
-        print("Abnormal ID found!")
-        print(line)
+        if len(id_) != 8:
+            print("Abnormal ID found!")
+            print(line)
         return None
     number = id_[:5]
     if number in SET:

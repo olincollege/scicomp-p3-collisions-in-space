@@ -7,7 +7,7 @@ from json_stream import streamable_list
 from tqdm import tqdm
 
 
-READ_PATH = "database/raw/MPCORB.DAT"
+READ_PATH = "database/raw/NEA.DAT"
 WRITE_PATH = "database/processed/orbits.json"
 PARSED = 0
 
@@ -17,8 +17,8 @@ def au_to_m(au):
 
 
 def parse_line(line):
-    name = line[163:194].strip()
-    id_ = line[0:7].strip()
+    name = line[166:193].strip()
+    id_ = line[0:6].strip()
     if len(id_) == 5:
         number = id_
         provisional = None
@@ -26,12 +26,12 @@ def parse_line(line):
         number = None
         provisional = id_
 
-    a = float(line[92:103].strip())
-    e = float(line[70:79].strip())
-    i = float(line[59:68].strip())
-    node = float(line[48:57].strip())
-    peri = float(line[37:46].strip())
-    m = float(line[26:35].strip())
+    a = float(line[92:102].strip())
+    e = float(line[70:78].strip())
+    i = float(line[59:67].strip())
+    node = float(line[48:56].strip())
+    peri = float(line[37:45].strip())
+    m = float(line[26:34].strip())
 
     elements = orbital.elements.KeplerianElements(
         a=au_to_m(a),
@@ -40,6 +40,8 @@ def parse_line(line):
         raan=math.radians(node),
         arg_pe=math.radians(peri),
         M0=math.radians(m),
+        body='Sun' 
+        epoch=
     )
 
     # Ellipse params
